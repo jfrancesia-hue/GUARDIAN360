@@ -2,13 +2,13 @@
 
 import {
   BarChart3,
-  Bell,
   Building2,
   Camera,
   CheckCircle2,
   CircleAlert,
   Clock3,
   Download,
+  Eye,
   FileText,
   Flame,
   Gavel,
@@ -18,10 +18,12 @@ import {
   Radio,
   Route,
   Satellite,
+  Send,
   Shield,
   Siren,
   Users,
-  Video
+  Video,
+  XCircle
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -67,6 +69,23 @@ interface DashboardEvent {
   severity: string;
   time: string;
   icon: LucideIcon;
+  status?: "Nuevo" | "ACK" | "Despachado" | "Cerrado";
+  assignedUnit?: string;
+}
+
+interface DashboardCamera {
+  name: string;
+  zone: string;
+  status: string;
+  health: number;
+  aiEnabled?: boolean;
+}
+
+interface Patrol {
+  code: string;
+  area: string;
+  status: string;
+  eta: string;
 }
 
 interface ExecutiveMetric {
@@ -90,6 +109,8 @@ interface VisualScene {
   icon: LucideIcon;
 }
 
+type ModuleId = "command" | "events" | "cameras" | "map" | "patrols" | "evidence" | "reports" | "audit";
+
 const fallbackKpis = [
   { label: "Eventos activos", value: "18", trend: "+4", state: "critical" },
   { label: "Camaras online", value: "142", trend: "96%", state: "ok" },
@@ -105,7 +126,8 @@ const fallbackEvents: DashboardEvent[] = [
     source: "Camara COM-014",
     severity: "Critico",
     time: "Hace 42s",
-    icon: Siren
+    icon: Siren,
+    status: "Nuevo"
   },
   {
     id: "fallback-license-plate",
@@ -114,7 +136,8 @@ const fallbackEvents: DashboardEvent[] = [
     source: "LPR COM-088",
     severity: "Alto",
     time: "Hace 2m",
-    icon: Camera
+    icon: Camera,
+    status: "ACK"
   },
   {
     id: "fallback-fire",
@@ -123,22 +146,24 @@ const fallbackEvents: DashboardEvent[] = [
     source: "SatellitePatrol",
     severity: "Medio",
     time: "Hace 7m",
-    icon: Flame
+    icon: Flame,
+    status: "Despachado",
+    assignedUnit: "B-03"
   }
 ];
 
-const patrols = [
+const fallbackPatrols: Patrol[] = [
   { code: "M-12", area: "Centro", status: "En ruta", eta: "04m" },
   { code: "M-07", area: "Norte", status: "Disponible", eta: "00m" },
   { code: "B-03", area: "Valle Viejo", status: "En sitio", eta: "00m" },
   { code: "M-18", area: "Sur", status: "Despachado", eta: "08m" }
 ];
 
-const fallbackCameras = [
-  { name: "COM-014", zone: "Centro", status: "IA activa", health: 98 },
-  { name: "COM-088", zone: "Acceso Sur", status: "LPR", health: 92 },
-  { name: "COM-031", zone: "Norte", status: "Degradada", health: 71 },
-  { name: "COM-102", zone: "Terminal", status: "IA activa", health: 99 }
+const fallbackCameras: DashboardCamera[] = [
+  { name: "COM-014", zone: "Centro", status: "IA activa", health: 98, aiEnabled: true },
+  { name: "COM-088", zone: "Acceso Sur", status: "LPR", health: 92, aiEnabled: true },
+  { name: "COM-031", zone: "Norte", status: "Degradada", health: 71, aiEnabled: false },
+  { name: "COM-102", zone: "Terminal", status: "IA activa", health: 99, aiEnabled: true }
 ];
 
 const defaultTenant = "Catamarca Provincia";
@@ -228,6 +253,35 @@ const eventFlow = [
   { title: "Cierre y evidencia", detail: "Hash inmutable", icon: LockKeyhole, state: "pending" }
 ];
 
+const moduleNav: Array<{ id: ModuleId; label: string; icon: LucideIcon }> = [
+  { id: "command", label: "Comando", icon: Radio },
+  { id: "events", label: "Eventos", icon: CircleAlert },
+  { id: "cameras", label: "Camaras", icon: Video },
+  { id: "map", label: "Mapa", icon: MapPin },
+  { id: "patrols", label: "Moviles", icon: Users },
+  { id: "evidence", label: "Evidencia", icon: LockKeyhole },
+  { id: "reports", label: "Reportes", icon: FileText },
+  { id: "audit", label: "Auditoria", icon: Gavel }
+];
+
+const moduleSummaries: Record<ModuleId, string> = {
+  command: "Vista ejecutiva y operativa en vivo",
+  events: "ACK, despacho y cierre de incidentes",
+  cameras: "Salud, IA y detalle de camaras",
+  map: "Capas, pins y zonas tacticas",
+  patrols: "Asignacion de moviles y ETAs",
+  evidence: "Hash, cadena de custodia y archivos",
+  reports: "PDF ejecutivo, licitacion y metricas",
+  audit: "Trazabilidad legal por usuario"
+};
+
+const generalFunctions: Array<[string, string]> = [
+  ["Generar reporte ejecutivo", "PDF para reunion"],
+  ["Cadena de custodia", "Hash y usuario"],
+  ["Exportar licitacion", "Arquitectura + alcance"],
+  ["Revisar auditoria", "Acciones sensibles"]
+];
+
 const demoPanicEvent: DashboardEvent = {
   id: "demo-panic-button",
   type: "Boton de panico",
@@ -235,7 +289,8 @@ const demoPanicEvent: DashboardEvent = {
   source: "CiudadanoApp",
   severity: "Critico",
   time: "Ahora",
-  icon: Siren
+  icon: Siren,
+  status: "Nuevo"
 };
 
 const defaultVisualScene: VisualScene = {
@@ -270,15 +325,29 @@ const visualScenes: VisualScene[] = [
 export default function Page() {
   const [events, setEvents] = useState(fallbackEvents);
   const [cameras, setCameras] = useState(fallbackCameras);
+  const [patrols, setPatrols] = useState(fallbackPatrols);
   const [eventSummary, setEventSummary] = useState<EventSummary | null>(null);
   const [cameraOverview, setCameraOverview] = useState<CameraOverview | null>(null);
   const [sessionState, setSessionState] = useState("Modo visual");
   const [selectedTenant, setSelectedTenant] = useState<DemoTenant>(defaultTenant);
   const [demoRunning, setDemoRunning] = useState(false);
   const [selectedVisualScene, setSelectedVisualScene] = useState(0);
+  const [activeModule, setActiveModule] = useState<ModuleId>("command");
+  const [selectedEventId, setSelectedEventId] = useState(fallbackEvents[0]?.id ?? demoPanicEvent.id);
+  const [selectedCameraName, setSelectedCameraName] = useState(fallbackCameras[0]?.name ?? "COM-000");
+  const [selectedPatrolCode, setSelectedPatrolCode] = useState(fallbackPatrols[0]?.code ?? "M-00");
+  const [selectedMapLayer, setSelectedMapLayer] = useState("Eventos + camaras");
   const selectedTenantProfile: TenantProfile =
     tenantProfiles[selectedTenant] ?? tenantProfiles[defaultTenant];
   const activeVisualScene = visualScenes[selectedVisualScene] ?? defaultVisualScene;
+  const selectedEvent: DashboardEvent =
+    events.find((event) => event.id === selectedEventId) ?? fallbackEvents[0] ?? demoPanicEvent;
+  const selectedCamera: DashboardCamera =
+    cameras.find((camera) => camera.name === selectedCameraName) ??
+    fallbackCameras[0] ?? { name: "COM-000", zone: "Sin zona", status: "Offline", health: 0, aiEnabled: false };
+  const selectedPatrol: Patrol =
+    patrols.find((patrol) => patrol.code === selectedPatrolCode) ??
+    fallbackPatrols[0] ?? { code: "M-00", area: "Sin area", status: "No disponible", eta: "--" };
 
   useEffect(() => {
     const token = window.localStorage.getItem("guardian360.accessToken");
@@ -355,10 +424,72 @@ export default function Page() {
   const startDemoSimulation = () => {
     setDemoRunning(true);
     setSessionState("Simulacion comercial activa");
+    setActiveModule("events");
+    setSelectedEventId(demoPanicEvent.id);
     setEvents((currentEvents) => [
       demoPanicEvent,
       ...currentEvents.filter((event) => event.id !== demoPanicEvent.id).slice(0, 5)
     ]);
+  };
+
+  const openModule = (moduleId: ModuleId) => {
+    setActiveModule(moduleId);
+    setSessionState(`${moduleNav.find((module) => module.id === moduleId)?.label ?? "Modulo"} abierto`);
+  };
+
+  const updateEvent = (eventId: string, patch: Partial<DashboardEvent>) => {
+    setEvents((currentEvents) =>
+      currentEvents.map((event) => (event.id === eventId ? { ...event, ...patch } : event))
+    );
+  };
+
+  const acknowledgeEvent = (eventId: string) => {
+    updateEvent(eventId, { status: "ACK", time: "Ahora" });
+    setSelectedEventId(eventId);
+    setActiveModule("events");
+    setSessionState("Evento confirmado por operador");
+  };
+
+  const dispatchEvent = (eventId: string, patrolCode = "M-12") => {
+    updateEvent(eventId, { status: "Despachado", assignedUnit: patrolCode, time: "Ahora" });
+    setPatrols((currentPatrols) =>
+      currentPatrols.map((patrol) =>
+        patrol.code === patrolCode ? { ...patrol, status: "Despachado", eta: "04m" } : patrol
+      )
+    );
+    setSelectedEventId(eventId);
+    setSelectedPatrolCode(patrolCode);
+    setActiveModule("patrols");
+    setSessionState(`Movil ${patrolCode} despachado`);
+  };
+
+  const closeEvent = (eventId: string) => {
+    updateEvent(eventId, { status: "Cerrado", time: "Cerrado" });
+    setActiveModule("evidence");
+    setSessionState("Caso cerrado con evidencia");
+  };
+
+  const toggleCameraAi = (cameraName: string) => {
+    setCameras((currentCameras) =>
+      currentCameras.map((camera) =>
+        camera.name === cameraName
+          ? {
+              ...camera,
+              aiEnabled: !camera.aiEnabled,
+              status: camera.aiEnabled ? "IA pausada" : "IA activa"
+            }
+          : camera
+      )
+    );
+    setSelectedCameraName(cameraName);
+    setActiveModule("cameras");
+    setSessionState("Estado de IA actualizado");
+  };
+
+  const centerMapOn = (label: string) => {
+    setSelectedMapLayer(label);
+    setActiveModule("map");
+    setSessionState(`Mapa centrado en ${label}`);
   };
 
   return (
@@ -369,21 +500,20 @@ export default function Page() {
           <span>Guardian360</span>
         </div>
         <nav className="nav-stack">
-          <button className="nav-item active" type="button" aria-label="Comando">
-            <Radio size={20} aria-hidden />
-          </button>
-          <button className="nav-item" type="button" aria-label="Camaras">
-            <Video size={20} aria-hidden />
-          </button>
-          <button className="nav-item" type="button" aria-label="Mapa">
-            <MapPin size={20} aria-hidden />
-          </button>
-          <button className="nav-item" type="button" aria-label="Satelital">
-            <Satellite size={20} aria-hidden />
-          </button>
-          <button className="nav-item" type="button" aria-label="Alertas">
-            <Bell size={20} aria-hidden />
-          </button>
+          {moduleNav.slice(0, 6).map((module) => {
+            const Icon = module.icon;
+            return (
+              <button
+                className={`nav-item ${activeModule === module.id ? "active" : ""}`}
+                key={module.id}
+                type="button"
+                aria-label={module.label}
+                onClick={() => openModule(module.id)}
+              >
+                <Icon size={20} aria-hidden />
+              </button>
+            );
+          })}
         </nav>
       </aside>
 
@@ -416,6 +546,41 @@ export default function Page() {
             </div>
           </div>
         </header>
+
+        <section className="module-switcher" aria-label="Modulos de Guardian360">
+          {moduleNav.map((module) => {
+            const Icon = module.icon;
+            return (
+              <button
+                className={activeModule === module.id ? "active" : ""}
+                key={module.id}
+                type="button"
+                onClick={() => openModule(module.id)}
+              >
+                <Icon size={17} aria-hidden />
+                <span>{module.label}</span>
+              </button>
+            );
+          })}
+        </section>
+
+        <section className="active-module-panel" aria-label="Modulo activo">
+          <div>
+            <p className="eyebrow">{activeModule}</p>
+            <h2>{moduleNav.find((module) => module.id === activeModule)?.label}</h2>
+            <span>{moduleSummaries[activeModule]}</span>
+          </div>
+          <div className="module-actions">
+            <button type="button" onClick={() => centerMapOn(selectedEvent?.zone ?? "evento critico")}>
+              <MapPin size={16} aria-hidden />
+              Centrar mapa
+            </button>
+            <button type="button" onClick={() => window.print()}>
+              <Download size={16} aria-hidden />
+              Exportar
+            </button>
+          </div>
+        </section>
 
         <section className="visual-command" aria-label="Vista visual del sistema">
           <article className="hero-visual">
@@ -580,20 +745,38 @@ export default function Page() {
               <span className="road vertical two" />
               <span className="aoi aoi-center">Centro</span>
               <span className="aoi aoi-north">Norte</span>
-              <span className="camera-pin pin-1">
+              <button className="camera-pin pin-1" type="button" onClick={() => {
+                setSelectedCameraName("COM-014");
+                centerMapOn("COM-014");
+              }}>
                 <Camera size={15} aria-hidden />
-              </span>
-              <span className="camera-pin pin-2">
+              </button>
+              <button className="camera-pin pin-2" type="button" onClick={() => {
+                setSelectedCameraName("COM-088");
+                centerMapOn("COM-088");
+              }}>
                 <Camera size={15} aria-hidden />
-              </span>
-              <span className="event-pin critical">
+              </button>
+              <button className="event-pin critical" type="button" onClick={() => {
+                setSelectedEventId(selectedEvent.id);
+                centerMapOn(selectedEvent.zone);
+              }}>
                 <Siren size={18} aria-hidden />
-              </span>
-              <span className="event-pin warning">
+              </button>
+              <button className="event-pin warning" type="button" onClick={() => {
+                setSelectedEventId("fallback-fire");
+                centerMapOn("Sierra de Ancasti");
+              }}>
                 <Flame size={18} aria-hidden />
-              </span>
-              <span className="patrol-unit unit-1">M-12</span>
-              <span className="patrol-unit unit-2">B-03</span>
+              </button>
+              <button className="patrol-unit unit-1" type="button" onClick={() => {
+                setSelectedPatrolCode("M-12");
+                centerMapOn("M-12");
+              }}>M-12</button>
+              <button className="patrol-unit unit-2" type="button" onClick={() => {
+                setSelectedPatrolCode("B-03");
+                centerMapOn("B-03");
+              }}>B-03</button>
             </div>
           </article>
 
@@ -610,21 +793,151 @@ export default function Page() {
               {events.map((event) => {
                 const Icon = event.icon;
                 return (
-                  <article className="event-row" key={event.id}>
+                  <article className={`event-row ${selectedEventId === event.id ? "selected" : ""}`} key={event.id}>
                     <div className="event-icon">
                       <Icon size={18} aria-hidden />
                     </div>
-                    <div>
+                    <button
+                      className="event-main"
+                      type="button"
+                      onClick={() => {
+                        setSelectedEventId(event.id);
+                        openModule("events");
+                      }}
+                    >
                       <strong>{event.type}</strong>
                       <span>{event.zone}</span>
                       <small>{event.source}</small>
+                    </button>
+                    <div className="event-meta">
+                      <time>{event.time}</time>
+                      <small>{event.status ?? "Nuevo"}</small>
                     </div>
-                    <time>{event.time}</time>
                   </article>
                 );
               })}
             </div>
           </aside>
+        </section>
+
+        <section className="operational-workbench" aria-label="Acciones por modulo">
+          <article className="detail-panel">
+            <div className="panel-title compact">
+              <div>
+                <p className="eyebrow">Detalle activo</p>
+                <h2>{activeModule === "cameras" ? selectedCamera.name : activeModule === "patrols" ? selectedPatrol.code : selectedEvent.type}</h2>
+              </div>
+              {activeModule === "cameras" ? <Video size={20} aria-hidden /> : activeModule === "patrols" ? <Users size={20} aria-hidden /> : <CircleAlert size={20} aria-hidden />}
+            </div>
+
+            <div className="detail-grid">
+              <span>
+                <strong>Modulo</strong>
+                {moduleNav.find((module) => module.id === activeModule)?.label}
+              </span>
+              <span>
+                <strong>Estado</strong>
+                {activeModule === "cameras" ? selectedCamera.status : activeModule === "patrols" ? selectedPatrol.status : selectedEvent.status ?? "Nuevo"}
+              </span>
+              <span>
+                <strong>Ubicacion</strong>
+                {activeModule === "cameras" ? selectedCamera.zone : activeModule === "patrols" ? selectedPatrol.area : selectedEvent.zone}
+              </span>
+              <span>
+                <strong>Origen</strong>
+                {activeModule === "cameras" ? `${selectedCamera.health}% salud` : activeModule === "patrols" ? `ETA ${selectedPatrol.eta}` : selectedEvent.source}
+              </span>
+            </div>
+
+            <div className="action-row">
+              <button type="button" onClick={() => acknowledgeEvent(selectedEvent.id)}>
+                <CheckCircle2 size={16} aria-hidden />
+                ACK
+              </button>
+              <button type="button" onClick={() => dispatchEvent(selectedEvent.id, selectedPatrol.code)}>
+                <Send size={16} aria-hidden />
+                Despachar
+              </button>
+              <button type="button" onClick={() => closeEvent(selectedEvent.id)}>
+                <LockKeyhole size={16} aria-hidden />
+                Cerrar
+              </button>
+              <button type="button" onClick={() => toggleCameraAi(selectedCamera.name)}>
+                {selectedCamera.aiEnabled ? <XCircle size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+                {selectedCamera.aiEnabled ? "Pausar IA" : "Activar IA"}
+              </button>
+            </div>
+          </article>
+
+          <article className="module-panel">
+            <div className="panel-title compact">
+              <div>
+                <p className="eyebrow">Funciones</p>
+                <h2>{moduleNav.find((module) => module.id === activeModule)?.label}</h2>
+              </div>
+              <BarChart3 size={20} aria-hidden />
+            </div>
+
+            {activeModule === "events" ? (
+              <div className="function-list">
+                {events.map((event) => (
+                  <button key={event.id} type="button" onClick={() => setSelectedEventId(event.id)}>
+                    <span>{event.type}</span>
+                    <small>{event.status ?? "Nuevo"}</small>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {activeModule === "cameras" ? (
+              <div className="function-list">
+                {cameras.map((camera) => (
+                  <button key={camera.name} type="button" onClick={() => setSelectedCameraName(camera.name)}>
+                    <span>{camera.name}</span>
+                    <small>{camera.status}</small>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {activeModule === "patrols" ? (
+              <div className="function-list">
+                {patrols.map((patrol) => (
+                  <button key={patrol.code} type="button" onClick={() => setSelectedPatrolCode(patrol.code)}>
+                    <span>{patrol.code}</span>
+                    <small>{patrol.status}</small>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {activeModule === "map" ? (
+              <div className="layer-list">
+                {["Eventos + camaras", "Moviles", "Zonas calientes", "Cobertura satelital"].map((layer) => (
+                  <button
+                    className={selectedMapLayer === layer ? "active" : ""}
+                    key={layer}
+                    type="button"
+                    onClick={() => centerMapOn(layer)}
+                  >
+                    <MapPin size={15} aria-hidden />
+                    {layer}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {activeModule === "evidence" || activeModule === "reports" || activeModule === "audit" || activeModule === "command" ? (
+              <div className="function-list">
+                {generalFunctions.map(([title, detail]) => (
+                  <button key={title} type="button" onClick={() => setSessionState(title)}>
+                    <span>{title}</span>
+                    <small>{detail}</small>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </article>
         </section>
 
         <section className="lower-grid">
@@ -635,12 +948,20 @@ export default function Page() {
             </div>
             <div className="patrol-table">
               {patrols.map((patrol) => (
-                <div className="patrol-row" key={patrol.code}>
+                <button
+                  className={`patrol-row ${selectedPatrolCode === patrol.code ? "selected" : ""}`}
+                  key={patrol.code}
+                  type="button"
+                  onClick={() => {
+                    setSelectedPatrolCode(patrol.code);
+                    openModule("patrols");
+                  }}
+                >
                   <strong>{patrol.code}</strong>
                   <span>{patrol.area}</span>
                   <em>{patrol.status}</em>
                   <small>{patrol.eta}</small>
-                </div>
+                </button>
               ))}
             </div>
           </article>
@@ -652,7 +973,15 @@ export default function Page() {
             </div>
             <div className="camera-list">
               {cameras.map((camera) => (
-                <div className="camera-row" key={camera.name}>
+                <button
+                  className={`camera-row ${selectedCameraName === camera.name ? "selected" : ""}`}
+                  key={camera.name}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCameraName(camera.name);
+                    openModule("cameras");
+                  }}
+                >
                   <div>
                     <strong>{camera.name}</strong>
                     <span>{camera.zone}</span>
@@ -661,7 +990,7 @@ export default function Page() {
                     <span style={{ width: `${camera.health}%` }} />
                   </div>
                   <small>{camera.status}</small>
-                </div>
+                </button>
               ))}
             </div>
           </article>
