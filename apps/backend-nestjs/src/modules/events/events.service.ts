@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { EventStatus, Prisma } from "@prisma/client";
+import { DispatchStatus, EventStatus, Prisma } from "@prisma/client";
 import type { RequestUser } from "../../common/decorators/current-user.decorator";
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../prisma/prisma.service";
+import { CloseEventDto } from "./dto/close-event.dto";
 import { CreateEventDto } from "./dto/create-event.dto";
+import { DispatchEventDto } from "./dto/dispatch-event.dto";
 import { EventResponseDto } from "./dto/event-response.dto";
 
 interface EventRow {
@@ -150,6 +152,91 @@ export class EventsService {
       entityId: id,
       correlationId,
       metadata: { status: EventStatus.ACKNOWLEDGED } satisfies Prisma.InputJsonObject
+    });
+
+    return this.findOne(actor.tenantId, id);
+  }
+
+  async dispatch(
+    actor: RequestUser,
+    id: string,
+    dto: DispatchEventDto,
+    correlationId: string
+  ): Promise<EventResponseDto> {
+    await this.findOne(actor.tenantId, id);
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.event.updateMany({
+        where: {
+          id,
+          ...this.prisma.tenantWhere(actor.tenantId),
+          status: { in: [EventStatus.NEW, EventStatus.ACKNOWLEDGED, EventStatus.DISPATCHED] }
+        },
+        data: {
+          status: EventStatus.DISPATCHED
+        }
+      });
+
+      await tx.dispatch.create({
+        data: {
+          tenantId: actor.tenantId,
+          eventId: id,
+          status: DispatchStatus.ASSIGNED,
+          priority: "HIGH",
+          assignedAt: new Date(),
+          notes: [dto.unitCode ? `Unidad ${dto.unitCode}` : null, dto.notes].filter(Boolean).join(" - ") || null
+        }
+      });
+    });
+
+    await this.audit.record({
+      tenantId: actor.tenantId,
+      userId: actor.id,
+      action: "DISPATCH",
+      entityType: "Event",
+      entityId: id,
+      correlationId,
+      metadata: {
+        status: EventStatus.DISPATCHED,
+        unitCode: dto.unitCode ?? null
+      } satisfies Prisma.InputJsonObject
+    });
+
+    return this.findOne(actor.tenantId, id);
+  }
+
+  async close(
+    actor: RequestUser,
+    id: string,
+    dto: CloseEventDto,
+    correlationId: string
+  ): Promise<EventResponseDto> {
+    await this.updateStatus(actor, id, EventStatus.RESOLVED, correlationId);
+
+    await this.prisma.dispatch.updateMany({
+      where: {
+        eventId: id,
+        ...this.prisma.tenantWhere(actor.tenantId),
+        status: { not: DispatchStatus.CLOSED }
+      },
+      data: {
+        status: DispatchStatus.CLOSED,
+        closedAt: new Date(),
+        ...(dto.resolutionNote ? { notes: dto.resolutionNote } : {})
+      }
+    });
+
+    await this.audit.record({
+      tenantId: actor.tenantId,
+      userId: actor.id,
+      action: "UPDATE",
+      entityType: "Event",
+      entityId: id,
+      correlationId,
+      metadata: {
+        status: EventStatus.RESOLVED,
+        resolutionNote: dto.resolutionNote ?? null
+      } satisfies Prisma.InputJsonObject
     });
 
     return this.findOne(actor.tenantId, id);

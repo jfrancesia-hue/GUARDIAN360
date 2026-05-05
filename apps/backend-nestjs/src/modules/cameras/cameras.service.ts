@@ -135,6 +135,47 @@ export class CamerasService {
     return camera;
   }
 
+  async toggleAi(
+    actor: RequestUser,
+    id: string,
+    enabled: boolean | undefined,
+    correlationId: string
+  ): Promise<CameraResponseDto> {
+    const camera = await this.findOne(actor.tenantId, id);
+    const hasVisionAi = camera.capabilities.includes("VISION_AI");
+    const nextEnabled = enabled ?? !hasVisionAi;
+    const nextCapabilities = nextEnabled
+      ? Array.from(new Set([...camera.capabilities, "VISION_AI"]))
+      : camera.capabilities.filter((capability) => capability !== "VISION_AI");
+
+    await this.prisma.camera.updateMany({
+      where: {
+        id,
+        ...this.prisma.tenantWhere(actor.tenantId)
+      },
+      data: {
+        capabilities: nextCapabilities,
+        status: nextEnabled ? CameraStatus.ONLINE : CameraStatus.MAINTENANCE,
+        ...(nextEnabled ? { lastFrameAt: new Date() } : {})
+      }
+    });
+
+    await this.audit.record({
+      tenantId: actor.tenantId,
+      userId: actor.id,
+      action: "UPDATE",
+      entityType: "Camera",
+      entityId: id,
+      correlationId,
+      metadata: {
+        aiEnabled: nextEnabled,
+        capabilities: nextCapabilities
+      } satisfies Prisma.InputJsonObject
+    });
+
+    return this.findOne(actor.tenantId, id);
+  }
+
   async overview(tenantId: string): Promise<{ total: number; online: number; degraded: number }> {
     const [total, online, degraded] = await Promise.all([
       this.prisma.camera.count({ where: this.prisma.tenantWhere(tenantId) }),

@@ -30,6 +30,8 @@ import { useEffect, useMemo, useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
+type EventUiStatus = "Nuevo" | "ACK" | "Despachado" | "Cerrado";
+
 interface ApiEvent {
   id: string;
   type: string;
@@ -46,6 +48,7 @@ interface ApiCamera {
   zone: string | null;
   status: string;
   health: number;
+  capabilities: string[];
 }
 
 interface EventSummary {
@@ -69,16 +72,18 @@ interface DashboardEvent {
   severity: string;
   time: string;
   icon: LucideIcon;
-  status?: "Nuevo" | "ACK" | "Despachado" | "Cerrado";
+  status?: EventUiStatus;
   assignedUnit?: string;
 }
 
 interface DashboardCamera {
+  id?: string;
   name: string;
   zone: string;
   status: string;
   health: number;
   aiEnabled?: boolean;
+  capabilities?: string[];
 }
 
 interface Patrol {
@@ -322,6 +327,32 @@ const visualScenes: VisualScene[] = [
   }
 ];
 
+async function patchApi<TResponse>(
+  path: string,
+  body: Record<string, unknown> = {}
+): Promise<TResponse | null> {
+  const token = window.localStorage.getItem("guardian360.accessToken");
+  if (!token) {
+    return null;
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "x-correlation-id": crypto.randomUUID()
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    throw new Error("La accion operativa no pudo completarse.");
+  }
+
+  return (await response.json()) as TResponse;
+}
+
 export default function Page() {
   const [events, setEvents] = useState(fallbackEvents);
   const [cameras, setCameras] = useState(fallbackCameras);
@@ -443,14 +474,24 @@ export default function Page() {
     );
   };
 
-  const acknowledgeEvent = (eventId: string) => {
+  const acknowledgeEvent = async (eventId: string) => {
     updateEvent(eventId, { status: "ACK", time: "Ahora" });
     setSelectedEventId(eventId);
     setActiveModule("events");
-    setSessionState("Evento confirmado por operador");
+    try {
+      const apiEvent = await patchApi<ApiEvent>(`/events/${eventId}/ack`);
+      if (apiEvent) {
+        updateEvent(eventId, toEventRow(apiEvent));
+        setSessionState("Evento confirmado por operador");
+        return;
+      }
+      setSessionState("Evento confirmado en modo visual");
+    } catch {
+      setSessionState("No se pudo confirmar en API; cambio visual aplicado");
+    }
   };
 
-  const dispatchEvent = (eventId: string, patrolCode = "M-12") => {
+  const dispatchEvent = async (eventId: string, patrolCode = "M-12") => {
     updateEvent(eventId, { status: "Despachado", assignedUnit: patrolCode, time: "Ahora" });
     setPatrols((currentPatrols) =>
       currentPatrols.map((patrol) =>
@@ -460,16 +501,42 @@ export default function Page() {
     setSelectedEventId(eventId);
     setSelectedPatrolCode(patrolCode);
     setActiveModule("patrols");
-    setSessionState(`Movil ${patrolCode} despachado`);
+    try {
+      const apiEvent = await patchApi<ApiEvent>(`/events/${eventId}/dispatch`, {
+        unitCode: patrolCode,
+        notes: "Despacho desde Centro de Comando"
+      });
+      if (apiEvent) {
+        updateEvent(eventId, { ...toEventRow(apiEvent), assignedUnit: patrolCode });
+        setSessionState(`Movil ${patrolCode} despachado`);
+        return;
+      }
+      setSessionState(`Movil ${patrolCode} despachado en modo visual`);
+    } catch {
+      setSessionState("No se pudo despachar en API; cambio visual aplicado");
+    }
   };
 
-  const closeEvent = (eventId: string) => {
+  const closeEvent = async (eventId: string) => {
     updateEvent(eventId, { status: "Cerrado", time: "Cerrado" });
     setActiveModule("evidence");
-    setSessionState("Caso cerrado con evidencia");
+    try {
+      const apiEvent = await patchApi<ApiEvent>(`/events/${eventId}/close`, {
+        resolutionNote: "Caso cerrado desde Centro de Comando"
+      });
+      if (apiEvent) {
+        updateEvent(eventId, toEventRow(apiEvent));
+        setSessionState("Caso cerrado con evidencia");
+        return;
+      }
+      setSessionState("Caso cerrado con evidencia en modo visual");
+    } catch {
+      setSessionState("No se pudo cerrar en API; cambio visual aplicado");
+    }
   };
 
-  const toggleCameraAi = (cameraName: string) => {
+  const toggleCameraAi = async (cameraName: string) => {
+    const cameraBeforeUpdate = cameras.find((camera) => camera.name === cameraName);
     setCameras((currentCameras) =>
       currentCameras.map((camera) =>
         camera.name === cameraName
@@ -483,7 +550,25 @@ export default function Page() {
     );
     setSelectedCameraName(cameraName);
     setActiveModule("cameras");
-    setSessionState("Estado de IA actualizado");
+    try {
+      if (!cameraBeforeUpdate?.id) {
+        setSessionState("Estado de IA actualizado en modo visual");
+        return;
+      }
+
+      const apiCamera = await patchApi<ApiCamera>(`/cameras/${cameraBeforeUpdate.id}/ai`, {
+        enabled: !cameraBeforeUpdate.aiEnabled
+      });
+      if (apiCamera) {
+        const updatedCamera = toCameraRow(apiCamera);
+        setCameras((currentCameras) =>
+          currentCameras.map((camera) => (camera.id === updatedCamera.id ? updatedCamera : camera))
+        );
+      }
+      setSessionState("Estado de IA actualizado");
+    } catch {
+      setSessionState("No se pudo actualizar IA en API; cambio visual aplicado");
+    }
   };
 
   const centerMapOn = (label: string) => {
@@ -1060,16 +1145,20 @@ function toEventRow(event: ApiEvent) {
     source: event.status,
     severity: event.severity,
     time: formatRelativeTime(event.detectedAt),
-    icon: event.type === "FIRE_HOTSPOT" ? Flame : event.type === "LICENSE_PLATE" ? Camera : Siren
+    icon: event.type === "FIRE_HOTSPOT" ? Flame : event.type === "LICENSE_PLATE" ? Camera : Siren,
+    status: formatEventStatus(event.status)
   };
 }
 
 function toCameraRow(camera: ApiCamera) {
   return {
+    id: camera.id,
     name: camera.externalId,
     zone: camera.zone ?? camera.name,
     status: formatCameraStatus(camera.status),
-    health: camera.health
+    health: camera.health,
+    aiEnabled: camera.capabilities.includes("VISION_AI") || camera.status === "ONLINE",
+    capabilities: camera.capabilities
   };
 }
 
@@ -1096,6 +1185,17 @@ function formatCameraStatus(status: string): string {
   };
 
   return labels[status] ?? status;
+}
+
+function formatEventStatus(status: string): EventUiStatus {
+  const labels: Record<string, EventUiStatus> = {
+    NEW: "Nuevo",
+    ACKNOWLEDGED: "ACK",
+    DISPATCHED: "Despachado",
+    RESOLVED: "Cerrado"
+  };
+
+  return labels[status] ?? "Nuevo";
 }
 
 function formatRelativeTime(value: string): string {

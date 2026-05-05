@@ -3,7 +3,9 @@ import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from "@nest
 import { randomUUID } from "node:crypto";
 import { CurrentUser, RequestUser } from "../../common/decorators/current-user.decorator";
 import { Roles } from "../../common/decorators/roles.decorator";
+import { CloseEventDto } from "./dto/close-event.dto";
 import { CreateEventDto } from "./dto/create-event.dto";
+import { DispatchEventDto } from "./dto/dispatch-event.dto";
 import { EventResponseDto } from "./dto/event-response.dto";
 import { UpdateEventStatusDto } from "./dto/update-event-status.dto";
 import { EventsService } from "./events.service";
@@ -55,6 +57,30 @@ export class EventsController {
     @Headers("x-correlation-id") correlationId = randomUUID()
   ): Promise<EventResponseDto> {
     return this.events.acknowledge(user, id, correlationId);
+  }
+
+  @Patch(":id/dispatch")
+  @Roles("SUPER_ADMIN", "TENANT_ADMIN", "OPERATOR")
+  @ApiOkResponse({ type: EventResponseDto })
+  dispatch(
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Body() dto: DispatchEventDto,
+    @Headers("x-correlation-id") correlationId = randomUUID()
+  ): Promise<EventResponseDto> {
+    return this.events.dispatch(user, id, dto, correlationId);
+  }
+
+  @Patch(":id/close")
+  @Roles("SUPER_ADMIN", "TENANT_ADMIN", "OPERATOR")
+  @ApiOkResponse({ type: EventResponseDto })
+  close(
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Body() dto: CloseEventDto,
+    @Headers("x-correlation-id") correlationId = randomUUID()
+  ): Promise<EventResponseDto> {
+    return this.events.close(user, id, dto, correlationId);
   }
 
   @Patch(":id/status")

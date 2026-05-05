@@ -5,6 +5,7 @@ import { CurrentUser, RequestUser } from "../../common/decorators/current-user.d
 import { Roles } from "../../common/decorators/roles.decorator";
 import { CameraResponseDto } from "./dto/camera-response.dto";
 import { CreateCameraDto } from "./dto/create-camera.dto";
+import { ToggleCameraAiDto } from "./dto/toggle-camera-ai.dto";
 import { UpdateCameraStatusDto } from "./dto/update-camera-status.dto";
 import { CamerasService } from "./cameras.service";
 
@@ -53,5 +54,17 @@ export class CamerasController {
     @Headers("x-correlation-id") correlationId = randomUUID()
   ): Promise<CameraResponseDto> {
     return this.cameras.updateStatus(user, id, dto.status, correlationId);
+  }
+
+  @Patch(":id/ai")
+  @Roles("SUPER_ADMIN", "TENANT_ADMIN", "OPERATOR")
+  @ApiOkResponse({ type: CameraResponseDto })
+  toggleAi(
+    @CurrentUser() user: RequestUser,
+    @Param("id") id: string,
+    @Body() dto: ToggleCameraAiDto,
+    @Headers("x-correlation-id") correlationId = randomUUID()
+  ): Promise<CameraResponseDto> {
+    return this.cameras.toggleAi(user, id, dto.enabled, correlationId);
   }
 }
