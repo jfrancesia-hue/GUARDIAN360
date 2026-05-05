@@ -37,7 +37,7 @@ export default function LoginPage() {
       window.localStorage.setItem("guardian360.accessToken", payload.accessToken);
       window.localStorage.setItem("guardian360.refreshToken", payload.refreshToken);
       window.localStorage.setItem("guardian360.user", JSON.stringify(payload.user));
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "No pudimos iniciar sesion.");
     } finally {

@@ -1273,6 +1273,395 @@ h2 {
   flex: 0 0 auto;
 }
 
+.public-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(54, 215, 239, 0.04) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    var(--bg);
+  background-size: 52px 52px;
+}
+
+.public-nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgba(240, 245, 242, 0.12);
+  background: rgba(16, 19, 18, 0.88);
+  backdrop-filter: blur(16px);
+  padding: 0 24px;
+}
+
+.public-brand,
+.public-nav nav,
+.public-actions,
+.architecture-lane {
+  display: flex;
+  align-items: center;
+}
+
+.public-brand {
+  gap: 10px;
+  color: var(--text);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.public-brand svg {
+  color: var(--green);
+}
+
+.public-nav nav {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.public-nav a,
+.public-actions a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.public-nav nav a {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.public-nav nav a:hover,
+.public-nav nav a.nav-login {
+  border-color: var(--line);
+  color: var(--cyan);
+}
+
+.public-hero {
+  min-height: calc(100vh - 72px);
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-items: end;
+  padding: clamp(24px, 5vw, 64px);
+}
+
+.public-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.08) contrast(1.03);
+}
+
+.public-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(16, 19, 18, 0.94), rgba(16, 19, 18, 0.55) 52%, rgba(16, 19, 18, 0.18)),
+    linear-gradient(0deg, rgba(16, 19, 18, 0.96), transparent 58%);
+}
+
+.public-hero-content {
+  position: relative;
+  z-index: 1;
+  width: min(860px, 100%);
+  display: grid;
+  gap: 18px;
+}
+
+.public-hero-content h1 {
+  font-size: clamp(42px, 7vw, 84px);
+  line-height: 0.95;
+}
+
+.public-hero-content p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.55;
+}
+
+.public-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primary-link,
+.secondary-link {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-weight: 900;
+}
+
+.primary-link {
+  background: var(--green);
+  color: #04110d !important;
+}
+
+.secondary-link {
+  border: 1px solid var(--line);
+  background: rgba(16, 19, 18, 0.62);
+  color: var(--text) !important;
+}
+
+.public-band,
+.public-split,
+.public-architecture {
+  width: min(1240px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+.public-band {
+  padding: 70px 0 0;
+}
+
+.public-section-title {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.public-section-title h2,
+.public-flow h2,
+.public-architecture h2 {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1;
+}
+
+.public-module-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.public-module {
+  min-height: 220px;
+  display: grid;
+  align-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(54, 215, 239, 0.1), transparent 50%),
+    rgba(23, 28, 27, 0.92);
+  padding: 18px;
+}
+
+.public-module svg {
+  color: var(--cyan);
+}
+
+.public-module h3,
+.public-flow h3,
+.public-app h3 {
+  margin: 0;
+}
+
+.public-module p,
+.public-flow p,
+.public-app p,
+.public-architecture {
+  color: var(--muted);
+}
+
+.public-module p,
+.public-flow p,
+.public-app p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.public-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  gap: 18px;
+  padding-top: 70px;
+}
+
+.public-map-visual {
+  min-height: 540px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.public-map-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.public-map-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(54, 215, 239, 0.14) 1px, transparent 1px),
+    linear-gradient(rgba(54, 215, 239, 0.1) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(16, 19, 18, 0.74), rgba(16, 19, 18, 0.1));
+  background-size: 68px 68px, 68px 68px, auto;
+}
+
+.public-pin {
+  position: absolute;
+  z-index: 1;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(240, 245, 242, 0.18);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.78);
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.public-pin-event {
+  left: 54%;
+  top: 40%;
+  color: var(--red);
+}
+
+.public-pin-camera {
+  left: 18%;
+  top: 27%;
+  color: var(--green);
+}
+
+.public-pin-unit {
+  left: 62%;
+  top: 64%;
+  color: var(--cyan);
+}
+
+.public-pin-zone {
+  left: 24%;
+  top: 68%;
+  color: var(--amber);
+}
+
+.public-flow {
+  display: grid;
+  align-content: center;
+  gap: 16px;
+}
+
+.public-flow-list {
+  display: grid;
+  gap: 10px;
+}
+
+.public-flow-list article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(23, 28, 27, 0.92);
+  padding: 14px;
+}
+
+.public-flow-list span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(18, 201, 155, 0.12);
+  color: var(--green);
+}
+
+.public-app-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.public-app {
+  min-height: 360px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.public-app img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(16, 19, 18, 0.95), rgba(16, 19, 18, 0.12));
+}
+
+.public-app div {
+  position: relative;
+  z-index: 1;
+  min-height: 360px;
+  display: grid;
+  align-content: end;
+  gap: 10px;
+  padding: 20px;
+}
+
+.public-app svg {
+  color: var(--green);
+}
+
+.public-architecture {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1fr);
+  gap: 18px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding: 70px 0;
+  margin-top: 70px;
+}
+
+.architecture-lane {
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.architecture-lane span {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(23, 28, 27, 0.92);
+  color: var(--text);
+  padding: 0 14px;
+  font-weight: 850;
+}
+
 .login-shell {
   min-height: 100vh;
   display: grid;
@@ -1376,6 +1765,20 @@ h2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .public-module-grid,
+  .public-split,
+  .public-architecture {
+    grid-template-columns: 1fr;
+  }
+
+  .public-app-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .architecture-lane {
+    justify-content: flex-start;
+  }
+
   .holo-stage {
     width: min(280px, 36%);
     right: 22px;
@@ -1416,6 +1819,63 @@ h2 {
 
   .workspace {
     padding: 16px;
+  }
+
+  .public-nav {
+    position: relative;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 14px 16px;
+  }
+
+  .public-nav nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .public-nav nav a {
+    padding: 0 8px;
+  }
+
+  .public-hero {
+    min-height: 620px;
+    padding: 24px 16px;
+  }
+
+  .public-hero-content h1 {
+    font-size: 42px;
+  }
+
+  .public-actions,
+  .primary-link,
+  .secondary-link {
+    width: 100%;
+  }
+
+  .public-band,
+  .public-split,
+  .public-architecture {
+    width: calc(100% - 32px);
+  }
+
+  .public-module-grid,
+  .public-app-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-map-visual,
+  .public-app,
+  .public-app div {
+    min-height: 360px;
+  }
+
+  .public-pin {
+    transform: scale(0.88);
+    transform-origin: left top;
+  }
+
+  .public-architecture {
+    padding-bottom: 42px;
   }
 
   .topbar {

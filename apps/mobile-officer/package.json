@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "echo \"Expo build se configura en el sprint mobile officer\"",
+    "build": "tsc -p tsconfig.json --noEmit",
     "dev": "echo \"Expo app se inicializa en el sprint mobile officer\"",
-    "lint": "echo \"Sin fuentes mobile todavia\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"Sin tests mobile todavia\"",
-    "typecheck": "echo \"Sin TypeScript mobile todavia\""
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
