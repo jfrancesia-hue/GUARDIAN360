@@ -759,6 +759,108 @@ h2 {
   margin-top: 3px;
 }
 
+.action-insight-panel {
+  grid-column: 1 / -1;
+  border: 1px solid color-mix(in srgb, var(--module-accent) 38%, var(--line));
+  border-radius: 8px;
+  background:
+    linear-gradient(110deg, color-mix(in srgb, var(--module-accent) 16%, transparent), transparent 44%),
+    rgba(23, 28, 27, 0.94);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+}
+
+.action-insight-panel p {
+  max-width: 900px;
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.action-pill {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--module-accent) 48%, transparent);
+  border-radius: 8px;
+  color: var(--module-accent);
+  background: rgba(16, 19, 18, 0.72);
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.insight-layout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.insight-layout > div,
+.insight-metrics span {
+  border: 1px solid rgba(240, 245, 242, 0.12);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.58);
+  padding: 12px;
+}
+
+.insight-layout strong,
+.insight-layout span,
+.insight-layout li,
+.insight-metrics strong {
+  display: block;
+}
+
+.insight-layout strong {
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.insight-layout span,
+.insight-layout li {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.insight-layout ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.insight-layout li {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+}
+
+.insight-layout li svg {
+  flex: 0 0 auto;
+  color: var(--module-accent);
+  margin-top: 2px;
+}
+
+.insight-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.insight-metrics span {
+  color: var(--muted);
+}
+
+.insight-metrics strong {
+  color: var(--module-accent);
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
 @keyframes orbitSpin {
   from {
     transform: rotateZ(0deg);
@@ -2340,6 +2442,10 @@ h2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .insight-layout {
+    grid-template-columns: 1fr;
+  }
+
   .public-module-grid,
   .public-split,
   .public-architecture {
@@ -2488,6 +2594,7 @@ h2 {
   .flow-steps,
   .hero-signal-grid,
   .scene-action-grid,
+  .insight-metrics,
   .detail-grid,
   .module-switcher {
     grid-template-columns: 1fr;

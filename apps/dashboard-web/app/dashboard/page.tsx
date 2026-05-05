@@ -136,6 +136,18 @@ interface ModuleExperience {
   functions: ModuleFunction[];
 }
 
+interface ActionInsight {
+  moduleId: ModuleId;
+  action: string;
+  eyebrow: string;
+  title: string;
+  summary: string;
+  outcome: string;
+  proof: string;
+  nextSteps: string[];
+  metrics: Array<{ label: string; value: string }>;
+}
+
 const fallbackKpis = [
   { label: "Eventos activos", value: "18", trend: "+4", state: "critical" },
   { label: "Camaras online", value: "142", trend: "96%", state: "ok" },
@@ -842,6 +854,222 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
   }
 };
 
+function buildActionInsight({
+  moduleId,
+  moduleLabel,
+  action,
+  sceneTitle,
+  event,
+  camera,
+  patrol,
+  selectedMapLayer,
+  tenant
+}: {
+  moduleId: ModuleId;
+  moduleLabel: string;
+  action: string;
+  sceneTitle: string | undefined;
+  event: DashboardEvent;
+  camera: DashboardCamera;
+  patrol: Patrol;
+  selectedMapLayer: string;
+  tenant: DemoTenant;
+}): ActionInsight {
+  const context = sceneTitle ? `${moduleLabel} / ${sceneTitle}` : moduleLabel;
+  const normalizedAction = action.toLowerCase();
+
+  if (normalizedAction.includes("ack") || normalizedAction.includes("revisar deteccion")) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "ACK legal y responsabilidad operativa",
+      summary: `${event.type} queda tomado por operador, con hora, usuario y fuente listos para auditoria.`,
+      outcome: "El incidente cambia de alerta suelta a caso gestionado, evitando que una camara o una llamada queden sin responsable.",
+      proof: "Para venderlo, muestra trazabilidad: quien confirmo, desde que fuente entro y que decision activa el siguiente paso.",
+      nextSteps: ["Despachar la unidad sugerida", "Vincular camaras cercanas", "Escalar si la prioridad sube"],
+      metrics: [
+        { label: "Evento", value: event.severity },
+        { label: "Estado", value: "ACK" },
+        { label: "Fuente", value: event.source }
+      ]
+    };
+  }
+
+  if (
+    normalizedAction.includes("despachar") ||
+    normalizedAction.includes("enviar patrulla") ||
+    normalizedAction.includes("asignar")
+  ) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "Despacho guiado con ETA visible",
+      summary: `${patrol.code} se asigna a ${event.zone} y el tablero deja constancia del movimiento.`,
+      outcome: "La decision operativa sale del sistema, no de una conversacion informal: evento, movil y ETA quedan unidos.",
+      proof: "En una demo comercial, esto demuestra reduccion de tiempos, control de recursos y trazabilidad para supervisores.",
+      nextSteps: ["Enviar instruccion al movil", "Marcar arribo en sitio", "Cerrar el caso con evidencia"],
+      metrics: [
+        { label: "Movil", value: patrol.code },
+        { label: "ETA", value: patrol.eta },
+        { label: "Zona", value: patrol.area }
+      ]
+    };
+  }
+
+  if (normalizedAction.includes("arribo") || normalizedAction.includes("liberar")) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "Seguimiento de unidad hasta disponibilidad",
+      summary: `${patrol.code} actualiza su estado operativo para que el centro vea capacidad real del turno.`,
+      outcome: "El supervisor sabe si la unidad esta en ruta, en sitio o libre para un nuevo incidente.",
+      proof: "Esto vende control de dotacion: menos llamadas, menos incertidumbre y mejor distribucion de recursos.",
+      nextSteps: ["Registrar novedad del movil", "Liberar unidad cuando cierre", "Reasignar cobertura preventiva"],
+      metrics: [
+        { label: "Unidad", value: patrol.code },
+        { label: "Estado", value: patrol.status },
+        { label: "ETA", value: patrol.eta }
+      ]
+    };
+  }
+
+  if (normalizedAction.includes("cerrar") || normalizedAction.includes("expediente") || normalizedAction.includes("evidencia")) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "Cierre probatorio con cadena de custodia",
+      summary: `${event.type} se prepara para cierre con evidencia, hash y registro auditable.`,
+      outcome: "La operacion no termina en el despacho: termina en un expediente defendible para auditoria o justicia.",
+      proof: "Para venta publica, este punto diferencia a Guardian360: no solo mira camaras, sostiene el caso completo.",
+      nextSteps: ["Adjuntar archivo o video", "Ver hash del caso", "Exportar constancia legal"],
+      metrics: [
+        { label: "Caso", value: event.status ?? "Nuevo" },
+        { label: "Custodia", value: "100%" },
+        { label: "Hash", value: "Activo" }
+      ]
+    };
+  }
+
+  if (
+    normalizedAction.includes("ia") ||
+    normalizedAction.includes("lpr") ||
+    normalizedAction.includes("stream") ||
+    normalizedAction.includes("camara") ||
+    normalizedAction.includes("deteccion")
+  ) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "VisionAI configurable por camara",
+      summary: `${camera.name} muestra estado, salud y capacidades para explicar que la IA se gobierna por zona.`,
+      outcome: "El operador puede activar analitica donde aporta valor y pausarla donde genera ruido o mantenimiento.",
+      proof: "Comercialmente demuestra que no es una pantalla estatica: cada dispositivo tiene salud, capacidades y accion directa.",
+      nextSteps: ["Abrir stream operativo", "Probar deteccion controlada", "Crear orden tecnica si baja la salud"],
+      metrics: [
+        { label: "Camara", value: camera.name },
+        { label: "Salud", value: `${camera.health}%` },
+        { label: "IA", value: camera.aiEnabled ? "Activa" : "Pausada" }
+      ]
+    };
+  }
+
+  if (
+    normalizedAction.includes("mapa") ||
+    normalizedAction.includes("capa") ||
+    normalizedAction.includes("zona") ||
+    normalizedAction.includes("cobertura") ||
+    normalizedAction.includes("ubicar") ||
+    normalizedAction.includes("centrar") ||
+    normalizedAction.includes("calor")
+  ) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "Mapa tactico con capas accionables",
+      summary: `${selectedMapLayer} queda como lectura activa para explicar cobertura, riesgo y respuesta territorial.`,
+      outcome: "La decision se toma sobre territorio: eventos, camaras, moviles y zonas calientes se cruzan en la misma vista.",
+      proof: "En venta permite mostrar cobertura urbana, rural o satelital sin cambiar de herramienta.",
+      nextSteps: ["Cruzar con camaras cercanas", "Despachar desde el pin", "Exportar mapa para reunion"],
+      metrics: [
+        { label: "Capa", value: selectedMapLayer },
+        { label: "Pins", value: "18" },
+        { label: "AOI", value: tenant }
+      ]
+    };
+  }
+
+  if (
+    normalizedAction.includes("generar") ||
+    normalizedAction.includes("exportar") ||
+    normalizedAction.includes("reporte") ||
+    normalizedAction.includes("brief") ||
+    normalizedAction.includes("licitacion")
+  ) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "Salida ejecutiva lista para decision",
+      summary: `${tenant} puede ver un entregable claro: impacto, alcance, cobertura y proximos pasos del piloto.`,
+      outcome: "La plataforma traduce operacion tecnica en material entendible para compras, ministros o municipios.",
+      proof: "Esto ayuda a vender porque convierte la demo en carpeta: numeros, narrativa, alcance y evidencia.",
+      nextSteps: ["Imprimir o exportar PDF", "Adjuntar anexo tecnico", "Definir alcance de piloto 90 dias"],
+      metrics: [
+        { label: "Formato", value: "PDF" },
+        { label: "Piloto", value: "90d" },
+        { label: "Ahorro", value: "58%" }
+      ]
+    };
+  }
+
+  if (
+    normalizedAction.includes("auditoria") ||
+    normalizedAction.includes("permiso") ||
+    normalizedAction.includes("usuario") ||
+    normalizedAction.includes("tenant") ||
+    normalizedAction.includes("compliance") ||
+    normalizedAction.includes("log")
+  ) {
+    return {
+      moduleId,
+      action,
+      eyebrow: context,
+      title: "Gobierno, permisos y cumplimiento",
+      summary: "La accion muestra controles por usuario, modulo, organismo y registro sensible.",
+      outcome: "Cada organismo puede operar con aislamiento, roles claros y auditoria de acciones criticas.",
+      proof: "Para organismos publicos, este argumento reduce riesgo: soberania, trazabilidad y permisos desde el producto.",
+      nextSteps: ["Revisar matriz de roles", "Exportar auditoria", "Validar aislamiento por tenant"],
+      metrics: [
+        { label: "Trazas", value: "100%" },
+        { label: "Tenant", value: tenant },
+        { label: "Control", value: "RBAC" }
+      ]
+    };
+  }
+
+  return {
+    moduleId,
+    action,
+    eyebrow: context,
+    title: `${moduleLabel} con respuesta contextual`,
+    summary: `La accion "${action}" cambia el relato y deja visible que el modulo tiene un objetivo propio.`,
+    outcome: "El cliente no ve botones decorativos: ve una decision, una consecuencia y un proximo paso.",
+    proof: "Sirve para vender porque cada modulo explica valor operativo, legal o ejecutivo con una salida concreta.",
+    nextSteps: ["Mostrar el antes y despues", "Abrir la funcion relacionada", "Exportar resultado para reunion"],
+    metrics: [
+      { label: "Modulo", value: moduleLabel },
+      { label: "Accion", value: "Activa" },
+      { label: "Modo", value: "Visual" }
+    ]
+  };
+}
+
 async function patchApi<TResponse>(
   path: string,
   body: Record<string, unknown> = {}
@@ -883,6 +1111,7 @@ export default function Page() {
   const [selectedTenant, setSelectedTenant] = useState<DemoTenant>(defaultTenant);
   const [demoRunning, setDemoRunning] = useState(false);
   const [activeModule, setActiveModule] = useState<ModuleId>("command");
+  const [activeInsight, setActiveInsight] = useState<ActionInsight | null>(null);
   const [selectedSceneIndexes, setSelectedSceneIndexes] =
     useState<Record<ModuleId, number>>(initialSceneIndexes);
   const [selectedEventId, setSelectedEventId] = useState(fallbackEvents[0]?.id ?? demoPanicEvent.id);
@@ -908,6 +1137,47 @@ export default function Page() {
   const selectedPatrol: Patrol =
     patrols.find((patrol) => patrol.code === selectedPatrolCode) ??
     fallbackPatrols[0] ?? { code: "M-00", area: "Sin area", status: "No disponible", eta: "--" };
+  const activeModuleLabel = moduleNav.find((module) => module.id === activeModule)?.label ?? "Modulo";
+  const activeActionInsight =
+    activeInsight ??
+    buildActionInsight({
+      moduleId: activeModule,
+      moduleLabel: activeModuleLabel,
+      action: activeVisualScene.functions[0]?.title ?? activeModuleExperience.functions[0]?.title ?? "Abrir modulo",
+      sceneTitle: activeVisualScene.title,
+      event: selectedEvent,
+      camera: selectedCamera,
+      patrol: selectedPatrol,
+      selectedMapLayer,
+      tenant: selectedTenant
+    });
+
+  const showActionInsight = ({
+    moduleId = activeModule,
+    action,
+    sceneTitle,
+    mapLayer = selectedMapLayer
+  }: {
+    moduleId?: ModuleId;
+    action: string;
+    sceneTitle?: string;
+    mapLayer?: string;
+  }) => {
+    const moduleLabel = moduleNav.find((module) => module.id === moduleId)?.label ?? "Modulo";
+    setActiveInsight(
+      buildActionInsight({
+        moduleId,
+        moduleLabel,
+        action,
+        sceneTitle,
+        event: selectedEvent,
+        camera: selectedCamera,
+        patrol: selectedPatrol,
+        selectedMapLayer: mapLayer,
+        tenant: selectedTenant
+      })
+    );
+  };
 
   useEffect(() => {
     const demoSession = window.localStorage.getItem("guardian360.demoSession") === "true";
@@ -993,6 +1263,7 @@ export default function Page() {
   }, [cameraOverview, eventSummary]);
 
   const startDemoSimulation = () => {
+    showActionInsight({ moduleId: "command", action: "Iniciar simulacion comercial", sceneTitle: "Centro operativo" });
     setDemoRunning(true);
     setSessionState("Simulacion comercial activa");
     setActiveModule("events");
@@ -1005,6 +1276,7 @@ export default function Page() {
 
   const openModule = (moduleId: ModuleId) => {
     setActiveModule(moduleId);
+    setActiveInsight(null);
     setSessionState(`${moduleNav.find((module) => module.id === moduleId)?.label ?? "Modulo"} abierto`);
   };
 
@@ -1015,6 +1287,7 @@ export default function Page() {
   };
 
   const acknowledgeEvent = async (eventId: string) => {
+    showActionInsight({ moduleId: "events", action: "Confirmar ACK", sceneTitle: "Cola prioritaria" });
     updateEvent(eventId, { status: "ACK", time: "Ahora" });
     setSelectedEventId(eventId);
     setActiveModule("events");
@@ -1032,6 +1305,7 @@ export default function Page() {
   };
 
   const dispatchEvent = async (eventId: string, patrolCode = "M-12") => {
+    showActionInsight({ moduleId: "patrols", action: "Despachar unidad", sceneTitle: "Asignacion rapida" });
     updateEvent(eventId, { status: "Despachado", assignedUnit: patrolCode, time: "Ahora" });
     setPatrols((currentPatrols) =>
       currentPatrols.map((patrol) =>
@@ -1058,6 +1332,7 @@ export default function Page() {
   };
 
   const closeEvent = async (eventId: string) => {
+    showActionInsight({ moduleId: "evidence", action: "Cerrar incidente", sceneTitle: "Expediente probatorio" });
     updateEvent(eventId, { status: "Cerrado", time: "Cerrado" });
     setActiveModule("evidence");
     try {
@@ -1076,6 +1351,7 @@ export default function Page() {
   };
 
   const toggleCameraAi = async (cameraName: string) => {
+    showActionInsight({ moduleId: "cameras", action: "Pausar o activar IA", sceneTitle: "IA por camara" });
     const cameraBeforeUpdate = cameras.find((camera) => camera.name === cameraName);
     setCameras((currentCameras) =>
       currentCameras.map((camera) =>
@@ -1112,12 +1388,14 @@ export default function Page() {
   };
 
   const centerMapOn = (label: string) => {
+    showActionInsight({ moduleId: "map", action: label, sceneTitle: "Mapa tactico", mapLayer: label });
     setSelectedMapLayer(label);
     setActiveModule("map");
     setSessionState(`Mapa centrado en ${label}`);
   };
 
   const markPatrolArrived = (patrolCode: string) => {
+    showActionInsight({ moduleId: "patrols", action: "Marcar arribo", sceneTitle: "Seguimiento" });
     setPatrols((currentPatrols) =>
       currentPatrols.map((patrol) =>
         patrol.code === patrolCode ? { ...patrol, status: "En sitio", eta: "00m" } : patrol
@@ -1129,6 +1407,7 @@ export default function Page() {
   };
 
   const releasePatrol = (patrolCode: string) => {
+    showActionInsight({ moduleId: "patrols", action: "Liberar unidad", sceneTitle: "Seguimiento" });
     setPatrols((currentPatrols) =>
       currentPatrols.map((patrol) =>
         patrol.code === patrolCode ? { ...patrol, status: "Disponible", eta: "00m" } : patrol
@@ -1140,6 +1419,8 @@ export default function Page() {
   };
 
   const runModuleFunction = (moduleId: ModuleId, functionTitle: string) => {
+    showActionInsight({ moduleId, action: functionTitle });
+
     if (moduleId === "command" && functionTitle === "Iniciar simulacion comercial") {
       startDemoSimulation();
       return;
@@ -1202,11 +1483,13 @@ export default function Page() {
       ...currentIndexes,
       [activeModule]: sceneIndex
     }));
+    setActiveInsight(null);
     setSessionState(`${scene.title}: ${scene.detail}`);
   };
 
   const runVisualSceneFunction = (scene: VisualScene, moduleFunction: ModuleFunction) => {
     const title = moduleFunction.title;
+    showActionInsight({ action: title, sceneTitle: scene.title });
 
     if (title.includes("Simulacion") || title.includes("Activar protocolo") || title.includes("Probar deteccion")) {
       startDemoSimulation();
@@ -1285,7 +1568,10 @@ export default function Page() {
             <MapPin size={16} aria-hidden />
             Ver mapa
           </button>
-          <button type="button" onClick={() => window.print()}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "command", action: "Exportar tablero" });
+            window.print();
+          }}>
             <Download size={16} aria-hidden />
             Exportar tablero
           </button>
@@ -1323,7 +1609,10 @@ export default function Page() {
             <MapPin size={16} aria-hidden />
             Ubicar camara
           </button>
-          <button type="button" onClick={() => setSessionState(`Stream abierto: ${selectedCamera.name}`)}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "cameras", action: "Abrir stream", sceneTitle: "Anillo urbano" });
+            setSessionState(`Stream abierto: ${selectedCamera.name}`);
+          }}>
             <Video size={16} aria-hidden />
             Abrir stream
           </button>
@@ -1366,11 +1655,17 @@ export default function Page() {
     if (activeModule === "evidence") {
       return (
         <>
-          <button type="button" onClick={() => setSessionState(`Hash verificado: ${selectedEvent.id}`)}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "evidence", action: "Ver hash del caso", sceneTitle: "Hash verificable" });
+            setSessionState(`Hash verificado: ${selectedEvent.id}`);
+          }}>
             <LockKeyhole size={16} aria-hidden />
             Ver hash
           </button>
-          <button type="button" onClick={() => setSessionState("Cadena de custodia abierta")}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "evidence", action: "Cadena de custodia", sceneTitle: "Custodia legal" });
+            setSessionState("Cadena de custodia abierta");
+          }}>
             <Gavel size={16} aria-hidden />
             Custodia
           </button>
@@ -1385,15 +1680,24 @@ export default function Page() {
     if (activeModule === "reports") {
       return (
         <>
-          <button type="button" onClick={() => window.print()}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "reports", action: "Generar ejecutivo", sceneTitle: "Reporte ejecutivo" });
+            window.print();
+          }}>
             <Download size={16} aria-hidden />
             Ejecutivo
           </button>
-          <button type="button" onClick={() => setSessionState("Carpeta de licitacion generada")}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "reports", action: "Generar licitacion", sceneTitle: "Carpeta licitacion" });
+            setSessionState("Carpeta de licitacion generada");
+          }}>
             <FileText size={16} aria-hidden />
             Licitacion
           </button>
-          <button type="button" onClick={() => setSessionState("Metricas operativas exportadas")}>
+          <button type="button" onClick={() => {
+            showActionInsight({ moduleId: "reports", action: "Exportar metricas", sceneTitle: "Operacion diaria" });
+            setSessionState("Metricas operativas exportadas");
+          }}>
             <BarChart3 size={16} aria-hidden />
             Metricas
           </button>
@@ -1403,15 +1707,24 @@ export default function Page() {
 
     return (
       <>
-        <button type="button" onClick={() => setSessionState("Log legal abierto")}>
+        <button type="button" onClick={() => {
+          showActionInsight({ moduleId: "audit", action: "Ver log legal", sceneTitle: "Log sensible" });
+          setSessionState("Log legal abierto");
+        }}>
           <Gavel size={16} aria-hidden />
           Log legal
         </button>
-        <button type="button" onClick={() => setSessionState("Permisos revisados")}>
+        <button type="button" onClick={() => {
+          showActionInsight({ moduleId: "audit", action: "Validar permisos", sceneTitle: "Roles y permisos" });
+          setSessionState("Permisos revisados");
+        }}>
           <Shield size={16} aria-hidden />
           Permisos
         </button>
-        <button type="button" onClick={() => window.print()}>
+        <button type="button" onClick={() => {
+          showActionInsight({ moduleId: "audit", action: "Exportar auditoria", sceneTitle: "Log sensible" });
+          window.print();
+        }}>
           <Download size={16} aria-hidden />
           Exportar auditoria
         </button>
@@ -1591,6 +1904,46 @@ export default function Page() {
               </div>
             </article>
           </div>
+
+          <article className="action-insight-panel" aria-live="polite" aria-label="Resultado de accion">
+            <div className="panel-title compact">
+              <div>
+                <p className="eyebrow">{activeActionInsight.eyebrow}</p>
+                <h2>{activeActionInsight.title}</h2>
+              </div>
+              <span className="action-pill">{activeActionInsight.action}</span>
+            </div>
+            <p>{activeActionInsight.summary}</p>
+            <div className="insight-layout">
+              <div>
+                <strong>Que cambia</strong>
+                <span>{activeActionInsight.outcome}</span>
+              </div>
+              <div>
+                <strong>Como venderlo</strong>
+                <span>{activeActionInsight.proof}</span>
+              </div>
+              <div>
+                <strong>Proximo paso</strong>
+                <ul>
+                  {activeActionInsight.nextSteps.map((step) => (
+                    <li key={step}>
+                      <CheckCircle2 size={15} aria-hidden />
+                      {step}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="insight-metrics">
+              {activeActionInsight.metrics.map((metric) => (
+                <span key={`${activeActionInsight.action}-${metric.label}`}>
+                  <strong>{metric.value}</strong>
+                  {metric.label}
+                </span>
+              ))}
+            </div>
+          </article>
         </section>
 
         <section className="commercial-grid" aria-label="Demo comercial ejecutiva">
