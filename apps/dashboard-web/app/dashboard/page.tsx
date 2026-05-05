@@ -846,6 +846,11 @@ async function patchApi<TResponse>(
   path: string,
   body: Record<string, unknown> = {}
 ): Promise<TResponse | null> {
+  const demoSession = window.localStorage.getItem("guardian360.demoSession") === "true";
+  if (demoSession) {
+    return null;
+  }
+
   const token = window.localStorage.getItem("guardian360.accessToken");
   if (!token) {
     return null;
@@ -905,6 +910,12 @@ export default function Page() {
     fallbackPatrols[0] ?? { code: "M-00", area: "Sin area", status: "No disponible", eta: "--" };
 
   useEffect(() => {
+    const demoSession = window.localStorage.getItem("guardian360.demoSession") === "true";
+    if (demoSession) {
+      setSessionState("Modo visual demo");
+      return;
+    }
+
     const token = window.localStorage.getItem("guardian360.accessToken");
     if (!token) {
       setSessionState("Inicia sesion para datos reales");
