@@ -109,9 +109,11 @@ interface VisualScene {
   title: string;
   label: string;
   detail: string;
+  objective: string;
   image: string;
   alt: string;
   icon: LucideIcon;
+  functions: ModuleFunction[];
 }
 
 type ModuleId = "command" | "events" | "cameras" | "map" | "patrols" | "evidence" | "reports" | "audit";
@@ -287,6 +289,17 @@ const moduleNav: Array<{ id: ModuleId; label: string; icon: LucideIcon }> = [
   { id: "audit", label: "Auditoria", icon: Gavel }
 ];
 
+const initialSceneIndexes: Record<ModuleId, number> = {
+  command: 0,
+  events: 0,
+  cameras: 0,
+  map: 0,
+  patrols: 0,
+  evidence: 0,
+  reports: 0,
+  audit: 0
+};
+
 const demoPanicEvent: DashboardEvent = {
   id: "demo-panic-button",
   type: "Boton de panico",
@@ -313,28 +326,49 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
     ],
     scenes: [
       {
-        title: "Sala de situacion",
+        title: "Centro operativo",
         label: "Comando 24/7",
-        detail: "Vista unificada para operador, supervisor y ejecutivo",
+        detail: "Coordina operador, supervisor y jefe de turno",
+        objective: "Mantener una sala de situacion viva: eventos priorizados, recursos disponibles y decisiones claras en una sola pantalla.",
         image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
         alt: "Puesto de operacion con computadora",
-        icon: Radio
+        icon: Radio,
+        functions: [
+          { title: "Abrir tablero vivo", detail: "KPIs y cola critica del turno", icon: BarChart3 },
+          { title: "Activar protocolo", detail: "Flujo operativo para incidente critico", icon: PlayCircle },
+          { title: "Coordinar recursos", detail: "Cruza eventos, camaras y moviles", icon: Route },
+          { title: "Exportar briefing", detail: "Resumen para jefe de guardia", icon: Download }
+        ]
       },
       {
-        title: "Flujo punta a punta",
-        label: "IA + despacho",
-        detail: "Deteccion, ACK, movil y cierre auditado",
+        title: "VisionAI",
+        label: "Deteccion inteligente",
+        detail: "Analitica visual para convertir camaras en alertas",
+        objective: "Detectar armas, peleas, caidas, patentes y situaciones anormales para que el operador reciba incidentes accionables.",
         image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80",
         alt: "Equipo trabajando en una sala tecnologica",
-        icon: Route
+        icon: Eye,
+        functions: [
+          { title: "Revisar deteccion IA", detail: "Valida el evento sugerido por VisionAI", icon: Eye },
+          { title: "Confirmar ACK", detail: "Operador toma el caso", icon: CheckCircle2 },
+          { title: "Ajustar sensibilidad", detail: "Perfil por zona y horario", icon: Camera },
+          { title: "Crear alerta critica", detail: "Genera evento para despacho", icon: Siren }
+        ]
       },
       {
-        title: "Decision politica",
-        label: "Tablero ejecutivo",
-        detail: "Impacto, ahorro y cobertura listos para reunion",
-        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
-        alt: "Oficina ejecutiva con mesa de trabajo",
-        icon: BarChart3
+        title: "SatellitePatrol",
+        label: "Cobertura territorial",
+        detail: "Rural, periferia y focos de calor",
+        objective: "Ampliar cobertura fuera del anillo urbano con capas satelitales, focos de calor y patrullaje territorial.",
+        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
+        alt: "Vista de la Tierra desde el espacio",
+        icon: Satellite,
+        functions: [
+          { title: "Abrir capa satelital", detail: "Mapa rural y periferia", icon: Satellite },
+          { title: "Detectar foco de calor", detail: "Crea alerta territorial", icon: Flame },
+          { title: "Enviar patrulla rural", detail: "Asigna unidad al area", icon: Send },
+          { title: "Exportar cobertura", detail: "Informe para defensa civil", icon: Download }
+        ]
       }
     ],
     functions: [
@@ -361,25 +395,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Cola prioritaria",
         label: "Triaging",
         detail: "Los eventos criticos suben primero",
+        objective: "Ordenar incidentes por severidad, tiempo y fuente para que el operador atienda lo que realmente requiere accion inmediata.",
         image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
         alt: "Distrito urbano de noche",
-        icon: CircleAlert
+        icon: CircleAlert,
+        functions: [
+          { title: "Filtrar criticos", detail: "Solo incidentes de mayor prioridad", icon: Siren },
+          { title: "Confirmar ACK", detail: "Toma responsabilidad operativa", icon: CheckCircle2 },
+          { title: "Ver fuente", detail: "Camara, app o satelite", icon: Camera },
+          { title: "Escalar prioridad", detail: "Notifica a supervisor", icon: CircleAlert }
+        ]
       },
       {
         title: "Despacho guiado",
         label: "Movil sugerido",
         detail: "Unidad mas cercana con ETA visible",
+        objective: "Elegir la unidad correcta, mostrar ETA y dejar constancia del despacho para no depender de llamadas informales.",
         image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
         alt: "Calle residencial iluminada",
-        icon: Send
+        icon: Send,
+        functions: [
+          { title: "Despachar unidad", detail: "Asigna el movil seleccionado", icon: Send },
+          { title: "Cambiar movil", detail: "Busca alternativa por zona", icon: Route },
+          { title: "Enviar instruccion", detail: "Mensaje operativo al movil", icon: Radio },
+          { title: "Marcar arribo", detail: "Confirma llegada al sitio", icon: CheckCircle2 }
+        ]
       },
       {
         title: "Cierre probatorio",
         label: "Resolucion",
         detail: "Caso cerrado con evidencia y auditoria",
+        objective: "Cerrar el incidente con resolucion, evidencia y trazabilidad para que el caso pueda sostenerse legalmente.",
         image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
         alt: "Documentos de trabajo sobre escritorio",
-        icon: LockKeyhole
+        icon: LockKeyhole,
+        functions: [
+          { title: "Cerrar incidente", detail: "Registra resolucion", icon: CheckCircle2 },
+          { title: "Adjuntar evidencia", detail: "Vincula imagen o video", icon: FileText },
+          { title: "Ver auditoria", detail: "Usuario, hora y accion", icon: Gavel },
+          { title: "Enviar reporte", detail: "Resumen del caso", icon: Download }
+        ]
       }
     ],
     functions: [
@@ -406,25 +461,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Anillo urbano",
         label: "Cobertura",
         detail: "Camaras organizadas por zona tactica",
+        objective: "Ver cobertura real por zona, detectar puntos ciegos y priorizar camaras que sostienen eventos criticos.",
         image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80",
         alt: "Vista aerea de ciudad de noche",
-        icon: Camera
+        icon: Camera,
+        functions: [
+          { title: "Ubicar camara", detail: "Centra el dispositivo en mapa", icon: MapPin },
+          { title: "Ver cobertura", detail: "Zona, fuente y estado", icon: Camera },
+          { title: "Detectar punto ciego", detail: "Marca area sin vision", icon: Eye },
+          { title: "Abrir stream", detail: "Vista operativa en vivo", icon: Video }
+        ]
       },
       {
         title: "IA por camara",
         label: "Activacion",
         detail: "Pausar o activar analitica por dispositivo",
+        objective: "Controlar que analitica corre en cada camara: VisionAI, LPR, deteccion de caidas o monitoreo basico.",
         image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
         alt: "Racks de servidores",
-        icon: Eye
+        icon: Eye,
+        functions: [
+          { title: "Pausar o activar IA", detail: "Cambia VisionAI para la camara", icon: Eye },
+          { title: "Configurar LPR", detail: "Lectura de patentes", icon: Camera },
+          { title: "Probar deteccion", detail: "Simula evento de IA", icon: PlayCircle },
+          { title: "Ver capacidades", detail: "Modelos activos por camara", icon: CheckCircle2 }
+        ]
       },
       {
         title: "Mantenimiento",
         label: "Salud",
         detail: "Degradacion visible antes de perder servicio",
+        objective: "Anticipar fallas: salud de camara, conectividad, degradacion y orden tecnica antes de perder cobertura.",
         image: "https://images.unsplash.com/photo-1581091870622-7c12842b9f4f?auto=format&fit=crop&w=1200&q=80",
         alt: "Tecnico trabajando con equipamiento",
-        icon: CheckCircle2
+        icon: CheckCircle2,
+        functions: [
+          { title: "Diagnostico de salud", detail: "Porcentaje y motivo de degradacion", icon: CheckCircle2 },
+          { title: "Crear orden tecnica", detail: "Deriva a mantenimiento", icon: FileText },
+          { title: "Pausar IA", detail: "Evita falsos positivos", icon: XCircle },
+          { title: "Exportar estado", detail: "Reporte de infraestructura", icon: Download }
+        ]
       }
     ],
     functions: [
@@ -451,25 +527,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Eventos + camaras",
         label: "Pins vivos",
         detail: "Cruce visual entre fuente y evento",
+        objective: "Cruzar cada incidente con su camara, zona y unidad cercana para que la decision salga del mapa.",
         image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80",
         alt: "Mapa urbano con marcadores",
-        icon: MapPin
+        icon: MapPin,
+        functions: [
+          { title: "Capa eventos + camaras", detail: "Activa fuentes e incidentes", icon: MapPin },
+          { title: "Centrar evento", detail: "Ubica el caso seleccionado", icon: CircleAlert },
+          { title: "Ver camaras cercanas", detail: "Fuentes utiles para el caso", icon: Camera },
+          { title: "Despachar desde mapa", detail: "Asigna movil al pin", icon: Send }
+        ]
       },
       {
         title: "Zonas calientes",
         label: "Heatmap",
         detail: "Sectores de mayor recurrencia",
+        objective: "Identificar recurrencia por barrio, horario y tipo de incidente para planificar prevencion y patrullaje.",
         image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
         alt: "Paisaje urbano visto desde altura",
-        icon: Flame
+        icon: Flame,
+        functions: [
+          { title: "Zonas calientes", detail: "Activa heatmap tactico", icon: Flame },
+          { title: "Analizar recurrencia", detail: "Eventos por zona y horario", icon: BarChart3 },
+          { title: "Sugerir patrullaje", detail: "Cobertura preventiva", icon: Route },
+          { title: "Exportar mapa", detail: "Imagen para reunion", icon: Download }
+        ]
       },
       {
         title: "Cobertura satelital",
         label: "Rural",
         detail: "Focos de calor y areas amplias",
+        objective: "Cubrir zonas rurales, serranas o perifericas con lectura satelital y alertas territoriales.",
         image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
         alt: "Vista de la Tierra desde el espacio",
-        icon: Satellite
+        icon: Satellite,
+        functions: [
+          { title: "Cobertura satelital", detail: "Activa capa rural", icon: Satellite },
+          { title: "Detectar foco de calor", detail: "Marca alerta ambiental", icon: Flame },
+          { title: "Crear zona AOI", detail: "Area de interes operativa", icon: MapPin },
+          { title: "Enviar patrulla rural", detail: "Deriva unidad al area", icon: Send }
+        ]
       }
     ],
     functions: [
@@ -496,25 +593,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Asignacion rapida",
         label: "Unidad cercana",
         detail: "Despacho basado en zona y ETA",
+        objective: "Enviar la unidad correcta al evento correcto, con ETA visible y registro de quien ordeno el despacho.",
         image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
         alt: "Calle de barrio iluminada",
-        icon: Send
+        icon: Send,
+        functions: [
+          { title: "Asignar al evento", detail: "Despacha el movil seleccionado", icon: Send },
+          { title: "Buscar unidad cercana", detail: "Prioriza por zona y ETA", icon: Route },
+          { title: "Enviar instruccion", detail: "Mensaje para la unidad", icon: Radio },
+          { title: "Ver ruta", detail: "Camino estimado al incidente", icon: MapPin }
+        ]
       },
       {
         title: "Seguimiento",
         label: "ETA vivo",
         detail: "Estado en ruta, en sitio o disponible",
+        objective: "Dar seguimiento operativo al movil: en ruta, arribo, en sitio, cierre y liberacion para el siguiente incidente.",
         image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
         alt: "Ruta y ciudad vista desde altura",
-        icon: Route
+        icon: Route,
+        functions: [
+          { title: "Marcar arribo", detail: "Unidad llego al sitio", icon: CheckCircle2 },
+          { title: "Actualizar ETA", detail: "Refresca tiempo operativo", icon: Clock3 },
+          { title: "Liberar unidad", detail: "Vuelve a disponible", icon: Route },
+          { title: "Reportar novedad", detail: "Nota del movil", icon: FileText }
+        ]
       },
       {
         title: "Turno operativo",
         label: "Dotacion",
         detail: "Moviles por area y disponibilidad",
+        objective: "Entender la dotacion por zona, disponibilidad y carga para justificar refuerzos o redistribucion.",
         image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
         alt: "Equipo trabajando en oficina operativa",
-        icon: Users
+        icon: Users,
+        functions: [
+          { title: "Brief de turno", detail: "Resumen de dotacion por area", icon: FileText },
+          { title: "Redistribuir moviles", detail: "Balancea cobertura", icon: Route },
+          { title: "Ver disponibles", detail: "Unidades listas", icon: CheckCircle2 },
+          { title: "Exportar dotacion", detail: "Informe de guardia", icon: Download }
+        ]
       }
     ],
     functions: [
@@ -541,25 +659,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Expediente probatorio",
         label: "Caso",
         detail: "Evidencia vinculada al incidente",
+        objective: "Organizar toda la evidencia del incidente en un expediente legible, auditable y preparado para revision.",
         image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
         alt: "Documentos de caso",
-        icon: FileText
+        icon: FileText,
+        functions: [
+          { title: "Adjuntar evidencia", detail: "Video, foto o documento", icon: FileText },
+          { title: "Vincular evento", detail: "Relaciona caso e incidente", icon: CircleAlert },
+          { title: "Cerrar expediente", detail: "Bloquea resolucion", icon: CheckCircle2 },
+          { title: "Exportar expediente", detail: "Salida documental", icon: Download }
+        ]
       },
       {
         title: "Hash verificable",
         label: "Integridad",
         detail: "Firma y cadena inmutable",
+        objective: "Probar que la evidencia no fue alterada mediante hash, versionado y cadena de integridad.",
         image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
         alt: "Infraestructura de servidores",
-        icon: LockKeyhole
+        icon: LockKeyhole,
+        functions: [
+          { title: "Ver hash del caso", detail: "Integridad del expediente", icon: LockKeyhole },
+          { title: "Validar archivo", detail: "Compara huella digital", icon: CheckCircle2 },
+          { title: "Recalcular hash", detail: "Control tecnico", icon: Shield },
+          { title: "Exportar constancia", detail: "Prueba de integridad", icon: Download }
+        ]
       },
       {
         title: "Custodia legal",
         label: "Auditable",
         detail: "Usuario, hora y tenant por accion",
+        objective: "Mostrar quien accedio, modifico o cerro evidencia, con tenant, timestamp y accion sensible.",
         image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80",
         alt: "Personas revisando documentos",
-        icon: Gavel
+        icon: Gavel,
+        functions: [
+          { title: "Cadena de custodia", detail: "Usuario, tenant y timestamp", icon: Gavel },
+          { title: "Ver accesos", detail: "Lecturas y descargas", icon: Users },
+          { title: "Bloquear evidencia", detail: "Protege caso sensible", icon: LockKeyhole },
+          { title: "Informe legal", detail: "Resumen para auditoria", icon: FileText }
+        ]
       }
     ],
     functions: [
@@ -586,25 +725,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Reporte ejecutivo",
         label: "Decision",
         detail: "Impacto, cobertura y ahorro",
+        objective: "Preparar una salida clara para decision politica: impacto, ahorro, cobertura, tiempos y alcance del piloto.",
         image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
         alt: "Graficos y analitica",
-        icon: BarChart3
+        icon: BarChart3,
+        functions: [
+          { title: "Generar ejecutivo", detail: "PDF para reunion politica", icon: Download },
+          { title: "Comparar ahorro", detail: "Costo local vs suite externa", icon: BarChart3 },
+          { title: "Ver cobertura", detail: "Camaras, zonas y moviles", icon: MapPin },
+          { title: "Enviar resumen", detail: "Brief para decisores", icon: Send }
+        ]
       },
       {
         title: "Carpeta licitacion",
         label: "Compra publica",
         detail: "Arquitectura, alcance y soberania",
+        objective: "Ordenar argumentos tecnicos y comerciales para compra publica: arquitectura, soberania, soporte y cumplimiento.",
         image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
         alt: "Documentacion de negocio",
-        icon: FileText
+        icon: FileText,
+        functions: [
+          { title: "Generar licitacion", detail: "Alcance y arquitectura", icon: FileText },
+          { title: "Adjuntar anexos", detail: "Modulos, seguridad y SLA", icon: CheckCircle2 },
+          { title: "Validar cumplimiento", detail: "Ley 25.326 y auditoria", icon: Gavel },
+          { title: "Exportar carpeta", detail: "Paquete para compra", icon: Download }
+        ]
       },
       {
         title: "Operacion diaria",
         label: "24 horas",
         detail: "Eventos, tiempos y resoluciones",
+        objective: "Mostrar rendimiento real del turno: eventos, ACK, despachos, cierres, tiempos y recursos usados.",
         image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
         alt: "Equipo reunido en oficina",
-        icon: Clock3
+        icon: Clock3,
+        functions: [
+          { title: "Reporte operativo", detail: "Turno, eventos y tiempos", icon: BarChart3 },
+          { title: "Ver SLA", detail: "ACK y despacho promedio", icon: Clock3 },
+          { title: "Filtrar por zona", detail: "Operacion por jurisdiccion", icon: MapPin },
+          { title: "Exportar metricas", detail: "Datos para seguimiento", icon: Download }
+        ]
       }
     ],
     functions: [
@@ -631,25 +791,46 @@ const moduleExperiences: Record<ModuleId, ModuleExperience> = {
         title: "Log sensible",
         label: "Auditoria",
         detail: "ACK, despacho, cierre y permisos",
+        objective: "Revisar cada accion sensible del sistema y responder quien hizo que, cuando, desde que tenant y con que resultado.",
         image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80",
         alt: "Revision documental",
-        icon: Gavel
+        icon: Gavel,
+        functions: [
+          { title: "Ver log legal", detail: "Acciones sensibles recientes", icon: Gavel },
+          { title: "Filtrar por usuario", detail: "Responsabilidad individual", icon: Users },
+          { title: "Ver accion", detail: "Detalle de cambio auditable", icon: FileText },
+          { title: "Exportar auditoria", detail: "Informe para cumplimiento", icon: Download }
+        ]
       },
       {
         title: "Roles y permisos",
         label: "Gobierno",
         detail: "Operador, supervisor y administrador",
+        objective: "Controlar que cada persona vea y ejecute solo lo que corresponde segun rol, organismo y modulo.",
         image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
         alt: "Equipo en sala de control",
-        icon: Users
+        icon: Users,
+        functions: [
+          { title: "Revisar usuarios", detail: "Roles por organismo", icon: Users },
+          { title: "Validar permisos", detail: "Control por modulo", icon: Shield },
+          { title: "Bloquear usuario", detail: "Accion preventiva", icon: LockKeyhole },
+          { title: "Exportar roles", detail: "Matriz de permisos", icon: Download }
+        ]
       },
       {
         title: "Infraestructura soberana",
         label: "Compliance",
         detail: "Datos locales y control por tenant",
+        objective: "Demostrar soberania de datos, aislamiento por tenant, infraestructura local y controles para organismos publicos.",
         image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
         alt: "Centro de datos con servidores",
-        icon: Shield
+        icon: Shield,
+        functions: [
+          { title: "Validar tenant", detail: "Aislamiento por organismo", icon: Building2 },
+          { title: "Revisar infraestructura", detail: "Servicios y trazabilidad", icon: Shield },
+          { title: "Ver backup", detail: "Continuidad operativa", icon: CheckCircle2 },
+          { title: "Informe compliance", detail: "Soberania y seguridad", icon: FileText }
+        ]
       }
     ],
     functions: [
@@ -697,6 +878,8 @@ export default function Page() {
   const [selectedTenant, setSelectedTenant] = useState<DemoTenant>(defaultTenant);
   const [demoRunning, setDemoRunning] = useState(false);
   const [activeModule, setActiveModule] = useState<ModuleId>("command");
+  const [selectedSceneIndexes, setSelectedSceneIndexes] =
+    useState<Record<ModuleId, number>>(initialSceneIndexes);
   const [selectedEventId, setSelectedEventId] = useState(fallbackEvents[0]?.id ?? demoPanicEvent.id);
   const [selectedCameraName, setSelectedCameraName] = useState(fallbackCameras[0]?.name ?? "COM-000");
   const [selectedPatrolCode, setSelectedPatrolCode] = useState(fallbackPatrols[0]?.code ?? "M-00");
@@ -704,6 +887,10 @@ export default function Page() {
   const selectedTenantProfile: TenantProfile =
     tenantProfiles[selectedTenant] ?? tenantProfiles[defaultTenant];
   const activeModuleExperience = moduleExperiences[activeModule];
+  const activeSceneIndex = selectedSceneIndexes[activeModule] ?? 0;
+  const activeVisualScene =
+    (activeModuleExperience.scenes[activeSceneIndex] ?? activeModuleExperience.scenes[0])!;
+  const ActiveVisualSceneIcon = activeVisualScene.icon;
   const ActiveModuleIcon = activeModuleExperience.icon;
   const PrimarySceneIcon = activeModuleExperience.scenes[0]?.icon ?? ActiveModuleIcon;
   const SecondarySceneIcon = activeModuleExperience.scenes[1]?.icon ?? Route;
@@ -994,6 +1181,82 @@ export default function Page() {
     setSessionState(functionTitle);
   };
 
+  const selectVisualScene = (sceneIndex: number, scene: VisualScene) => {
+    setSelectedSceneIndexes((currentIndexes) => ({
+      ...currentIndexes,
+      [activeModule]: sceneIndex
+    }));
+    setSessionState(`${scene.title}: ${scene.detail}`);
+  };
+
+  const runVisualSceneFunction = (scene: VisualScene, moduleFunction: ModuleFunction) => {
+    const title = moduleFunction.title;
+
+    if (title.includes("Simulacion") || title.includes("Activar protocolo") || title.includes("Probar deteccion")) {
+      startDemoSimulation();
+      return;
+    }
+
+    if (title.includes("ACK") || title.includes("Revisar deteccion")) {
+      void acknowledgeEvent(selectedEvent.id);
+      return;
+    }
+
+    if (
+      title.includes("Despachar") ||
+      title.includes("Enviar patrulla") ||
+      title.includes("Asignar") ||
+      title.includes("Despacho")
+    ) {
+      void dispatchEvent(selectedEvent.id, selectedPatrol.code);
+      return;
+    }
+
+    if (title.includes("Cerrar")) {
+      void closeEvent(selectedEvent.id);
+      return;
+    }
+
+    if (title.includes("Arribo")) {
+      markPatrolArrived(selectedPatrol.code);
+      return;
+    }
+
+    if (title.includes("Liberar")) {
+      releasePatrol(selectedPatrol.code);
+      return;
+    }
+
+    if (title.includes("IA") || title.includes("LPR") || title.includes("stream") || title.includes("Stream")) {
+      if (title.includes("stream") || title.includes("Stream")) {
+        setSessionState(`${scene.title}: stream abierto ${selectedCamera.name}`);
+        return;
+      }
+      void toggleCameraAi(selectedCamera.name);
+      return;
+    }
+
+    if (
+      title.includes("Capa") ||
+      title.includes("Mapa") ||
+      title.includes("cobertura") ||
+      title.includes("Cobertura") ||
+      title.includes("zona") ||
+      title.includes("Zona") ||
+      title.includes("Ubicar") ||
+      title.includes("Centrar")
+    ) {
+      centerMapOn(title.replace("Capa ", ""));
+      return;
+    }
+
+    if (title.includes("Exportar") || title.includes("Generar") || title.includes("PDF")) {
+      window.print();
+    }
+
+    setSessionState(`${scene.title}: ${title}`);
+  };
+
   const renderModuleToolbar = () => {
     if (activeModule === "command") {
       return (
@@ -1225,7 +1488,7 @@ export default function Page() {
 
         <section className={`visual-command module-${activeModule}`} aria-label="Vista visual del sistema">
           <article className="hero-visual">
-            <img src={activeModuleExperience.image} alt={activeModuleExperience.alt} />
+            <img src={activeVisualScene.image} alt={activeVisualScene.alt} />
             <div className="holo-stage" aria-hidden="true">
               <span className="holo-ring" />
               <span className="holo-node node-camera">
@@ -1246,8 +1509,9 @@ export default function Page() {
               </span>
             </div>
             <div className="hero-visual-overlay">
-              <p className="eyebrow">{activeModuleExperience.eyebrow}</p>
-              <h2>{activeModuleExperience.title}</h2>
+              <p className="eyebrow">{activeVisualScene.label}</p>
+              <h2>{activeVisualScene.title}</h2>
+              <p className="hero-objective">{activeVisualScene.objective}</p>
               <div className="hero-signal-grid">
                 {activeModuleExperience.signals.map((signal) => (
                   <span key={`${signal.value}-${signal.label}`}>
@@ -1264,10 +1528,10 @@ export default function Page() {
               const Icon = scene.icon;
               return (
                 <button
-                  className={`scene-card ${index === 0 ? "active" : ""}`}
+                  className={`scene-card ${index === activeSceneIndex ? "active" : ""}`}
                   key={scene.title}
                   type="button"
-                  onClick={() => setSessionState(scene.title)}
+                  onClick={() => selectVisualScene(index, scene)}
                 >
                   <img src={scene.image} alt={scene.alt} />
                   <div>
@@ -1281,6 +1545,35 @@ export default function Page() {
                 </button>
               );
             })}
+
+            <article className="scene-action-panel" aria-label={`Funciones de ${activeVisualScene.title}`}>
+              <div className="panel-title compact">
+                <div>
+                  <p className="eyebrow">Objetivo</p>
+                  <h2>{activeVisualScene.title}</h2>
+                </div>
+                <ActiveVisualSceneIcon size={20} aria-hidden />
+              </div>
+              <p>{activeVisualScene.objective}</p>
+              <div className="scene-action-grid">
+                {activeVisualScene.functions.map((moduleFunction) => {
+                  const Icon = moduleFunction.icon;
+                  return (
+                    <button
+                      key={moduleFunction.title}
+                      type="button"
+                      onClick={() => runVisualSceneFunction(activeVisualScene, moduleFunction)}
+                    >
+                      <Icon size={17} aria-hidden />
+                      <span>
+                        <strong>{moduleFunction.title}</strong>
+                        <small>{moduleFunction.detail}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </article>
           </div>
         </section>
 

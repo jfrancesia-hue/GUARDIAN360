@@ -389,6 +389,14 @@ h2 {
   line-height: 1;
 }
 
+.hero-objective {
+  max-width: 680px;
+  margin: -6px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
 .holo-stage {
   position: absolute;
   z-index: 2;
@@ -564,6 +572,66 @@ h2 {
 
 .scene-card small {
   color: var(--muted);
+}
+
+.scene-action-panel {
+  border: 1px solid color-mix(in srgb, var(--module-accent) 34%, var(--line));
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--module-accent) 12%, transparent), transparent 54%),
+    rgba(23, 28, 27, 0.94);
+  padding: 16px;
+}
+
+.scene-action-panel p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.48;
+}
+
+.scene-action-panel .panel-title svg {
+  color: var(--module-accent);
+}
+
+.scene-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.scene-action-grid button {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.72);
+  color: var(--text);
+  cursor: pointer;
+  padding: 10px;
+  text-align: left;
+}
+
+.scene-action-grid button:hover {
+  border-color: color-mix(in srgb, var(--module-accent) 72%, transparent);
+  color: var(--module-accent);
+}
+
+.scene-action-grid svg {
+  flex: 0 0 auto;
+}
+
+.scene-action-grid span,
+.scene-action-grid strong,
+.scene-action-grid small {
+  display: block;
+  min-width: 0;
+}
+
+.scene-action-grid small {
+  color: var(--muted);
+  margin-top: 3px;
 }
 
 @keyframes orbitSpin {
@@ -1370,6 +1438,7 @@ h2 {
   .executive-metrics,
   .flow-steps,
   .hero-signal-grid,
+  .scene-action-grid,
   .detail-grid,
   .module-switcher {
     grid-template-columns: 1fr;
