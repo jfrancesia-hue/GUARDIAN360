@@ -238,15 +238,17 @@ const demoPanicEvent: DashboardEvent = {
   icon: Siren
 };
 
+const defaultVisualScene: VisualScene = {
+  title: "Comando integrado",
+  label: "Centro operativo",
+  detail: "Monitoreo, IA y despacho en una sola vista",
+  image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=84",
+  alt: "Operador trabajando con pantallas de monitoreo",
+  icon: Radio
+};
+
 const visualScenes: VisualScene[] = [
-  {
-    title: "Comando integrado",
-    label: "Centro operativo",
-    detail: "Monitoreo, IA y despacho en una sola vista",
-    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
-    alt: "Sala tecnologica con servidores y luces de monitoreo",
-    icon: Radio
-  },
+  defaultVisualScene,
   {
     title: "Camara urbana",
     label: "VisionAI",
@@ -273,8 +275,10 @@ export default function Page() {
   const [sessionState, setSessionState] = useState("Modo visual");
   const [selectedTenant, setSelectedTenant] = useState<DemoTenant>(defaultTenant);
   const [demoRunning, setDemoRunning] = useState(false);
+  const [selectedVisualScene, setSelectedVisualScene] = useState(0);
   const selectedTenantProfile: TenantProfile =
     tenantProfiles[selectedTenant] ?? tenantProfiles[defaultTenant];
+  const activeVisualScene = visualScenes[selectedVisualScene] ?? defaultVisualScene;
 
   useEffect(() => {
     const token = window.localStorage.getItem("guardian360.accessToken");
@@ -415,13 +419,29 @@ export default function Page() {
 
         <section className="visual-command" aria-label="Vista visual del sistema">
           <article className="hero-visual">
-            <img
-              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=82"
-              alt="Operador trabajando con pantallas de monitoreo"
-            />
+            <img src={activeVisualScene.image} alt={activeVisualScene.alt} />
+            <div className="holo-stage" aria-hidden="true">
+              <span className="holo-ring" />
+              <span className="holo-node node-camera">
+                <Camera size={20} />
+                <small>VisionAI</small>
+              </span>
+              <span className="holo-node node-dispatch">
+                <Route size={20} />
+                <small>Despacho</small>
+              </span>
+              <span className="holo-node node-satellite">
+                <Satellite size={20} />
+                <small>Satelite</small>
+              </span>
+              <span className="holo-node node-evidence">
+                <LockKeyhole size={20} />
+                <small>Evidencia</small>
+              </span>
+            </div>
             <div className="hero-visual-overlay">
-              <p className="eyebrow">Demo visual vendible</p>
-              <h2>Guardián360 muestra el operativo, no solo los datos</h2>
+              <p className="eyebrow">{activeVisualScene.label}</p>
+              <h2>Guardian360 se ve como un centro de comando real</h2>
               <div className="hero-signal-grid">
                 <span>
                   <strong>18</strong>
@@ -440,10 +460,15 @@ export default function Page() {
           </article>
 
           <div className="scene-strip">
-            {visualScenes.map((scene) => {
+            {visualScenes.map((scene, index) => {
               const Icon = scene.icon;
               return (
-                <article className="scene-card" key={scene.title}>
+                <button
+                  className={`scene-card ${index === selectedVisualScene ? "active" : ""}`}
+                  key={scene.title}
+                  type="button"
+                  onClick={() => setSelectedVisualScene(index)}
+                >
                   <img src={scene.image} alt={scene.alt} />
                   <div>
                     <span>
@@ -453,7 +478,7 @@ export default function Page() {
                     <strong>{scene.title}</strong>
                     <small>{scene.detail}</small>
                   </div>
-                </article>
+                </button>
               );
             })}
           </div>
