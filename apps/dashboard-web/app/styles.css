@@ -248,6 +248,7 @@ h2 {
 }
 
 .active-module-panel {
+  --module-accent: var(--cyan);
   min-height: 86px;
   display: flex;
   align-items: center;
@@ -256,7 +257,7 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background:
-    linear-gradient(90deg, rgba(54, 215, 239, 0.1), transparent 48%),
+    linear-gradient(90deg, color-mix(in srgb, var(--module-accent) 18%, transparent), transparent 48%),
     rgba(23, 28, 27, 0.94);
   padding: 16px;
   margin-bottom: 14px;
@@ -299,11 +300,31 @@ h2 {
 }
 
 .visual-command {
+  --module-accent: var(--cyan);
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
   gap: 14px;
   margin-bottom: 14px;
   perspective: 1200px;
+}
+
+.module-events {
+  --module-accent: var(--red);
+}
+
+.module-cameras,
+.module-patrols {
+  --module-accent: var(--green);
+}
+
+.module-map,
+.module-reports {
+  --module-accent: var(--amber);
+}
+
+.module-evidence,
+.module-audit {
+  --module-accent: var(--violet);
 }
 
 .hero-visual,
@@ -347,7 +368,8 @@ h2 {
 .hero-visual::after {
   background:
     linear-gradient(90deg, rgba(16, 19, 18, 0.94), rgba(16, 19, 18, 0.42) 54%, rgba(16, 19, 18, 0.16)),
-    linear-gradient(0deg, rgba(16, 19, 18, 0.9), transparent 54%);
+    linear-gradient(0deg, rgba(16, 19, 18, 0.9), transparent 54%),
+    radial-gradient(circle at 76% 28%, color-mix(in srgb, var(--module-accent) 26%, transparent), transparent 34%);
 }
 
 .hero-visual-overlay {
@@ -382,13 +404,13 @@ h2 {
 .holo-ring {
   position: absolute;
   inset: 9%;
-  border: 1px solid rgba(54, 215, 239, 0.45);
+  border: 1px solid color-mix(in srgb, var(--module-accent) 58%, transparent);
   border-radius: 50%;
   background:
-    radial-gradient(circle, rgba(54, 215, 239, 0.1), transparent 55%),
-    conic-gradient(from 180deg, rgba(54, 215, 239, 0), rgba(54, 215, 239, 0.62), rgba(18, 201, 155, 0.38), rgba(54, 215, 239, 0));
+    radial-gradient(circle, color-mix(in srgb, var(--module-accent) 14%, transparent), transparent 55%),
+    conic-gradient(from 180deg, transparent, color-mix(in srgb, var(--module-accent) 72%, transparent), rgba(18, 201, 155, 0.38), transparent);
   box-shadow:
-    0 0 42px rgba(54, 215, 239, 0.18),
+    0 0 42px color-mix(in srgb, var(--module-accent) 22%, transparent),
     inset 0 0 32px rgba(18, 201, 155, 0.12);
   animation: orbitSpin 12s linear infinite;
 }
@@ -411,7 +433,7 @@ h2 {
   border: 1px solid rgba(240, 245, 242, 0.18);
   border-radius: 8px;
   background: rgba(16, 19, 18, 0.72);
-  color: var(--cyan);
+  color: var(--module-accent);
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.32);
   transform: rotateZ(18deg) rotateX(-60deg) translateZ(34px);
   animation: floatNode 3.8s ease-in-out infinite;
@@ -421,6 +443,9 @@ h2 {
   color: var(--text);
   font-size: 11px;
   font-weight: 900;
+  max-width: 88px;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 
 .node-camera {
@@ -491,7 +516,7 @@ h2 {
 
 .scene-card.active,
 .scene-card:hover {
-  border-color: rgba(54, 215, 239, 0.72);
+  border-color: color-mix(in srgb, var(--module-accent) 78%, transparent);
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
   transform: translateY(-2px) rotateX(2deg);
 }
@@ -509,7 +534,7 @@ h2 {
 .scene-card.active::after {
   background:
     linear-gradient(90deg, rgba(16, 19, 18, 0.86), rgba(16, 19, 18, 0.18)),
-    linear-gradient(0deg, rgba(54, 215, 239, 0.18), transparent);
+    linear-gradient(0deg, color-mix(in srgb, var(--module-accent) 22%, transparent), transparent);
 }
 
 .scene-card div {
@@ -526,7 +551,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: var(--cyan);
+  color: var(--module-accent);
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
@@ -1058,6 +1083,16 @@ h2 {
   gap: 10px;
   padding: 0 12px;
   text-align: left;
+}
+
+.function-list button > svg {
+  flex: 0 0 auto;
+  color: var(--cyan);
+}
+
+.function-list button > div {
+  min-width: 0;
+  margin-right: auto;
 }
 
 .function-list span,

@@ -116,6 +116,24 @@ interface VisualScene {
 
 type ModuleId = "command" | "events" | "cameras" | "map" | "patrols" | "evidence" | "reports" | "audit";
 
+interface ModuleFunction {
+  title: string;
+  detail: string;
+  icon: LucideIcon;
+}
+
+interface ModuleExperience {
+  eyebrow: string;
+  title: string;
+  summary: string;
+  image: string;
+  alt: string;
+  icon: LucideIcon;
+  signals: Array<{ value: string; label: string }>;
+  scenes: VisualScene[];
+  functions: ModuleFunction[];
+}
+
 const fallbackKpis = [
   { label: "Eventos activos", value: "18", trend: "+4", state: "critical" },
   { label: "Camaras online", value: "142", trend: "96%", state: "ok" },
@@ -269,24 +287,6 @@ const moduleNav: Array<{ id: ModuleId; label: string; icon: LucideIcon }> = [
   { id: "audit", label: "Auditoria", icon: Gavel }
 ];
 
-const moduleSummaries: Record<ModuleId, string> = {
-  command: "Vista ejecutiva y operativa en vivo",
-  events: "ACK, despacho y cierre de incidentes",
-  cameras: "Salud, IA y detalle de camaras",
-  map: "Capas, pins y zonas tacticas",
-  patrols: "Asignacion de moviles y ETAs",
-  evidence: "Hash, cadena de custodia y archivos",
-  reports: "PDF ejecutivo, licitacion y metricas",
-  audit: "Trazabilidad legal por usuario"
-};
-
-const generalFunctions: Array<[string, string]> = [
-  ["Generar reporte ejecutivo", "PDF para reunion"],
-  ["Cadena de custodia", "Hash y usuario"],
-  ["Exportar licitacion", "Arquitectura + alcance"],
-  ["Revisar auditoria", "Acciones sensibles"]
-];
-
 const demoPanicEvent: DashboardEvent = {
   id: "demo-panic-button",
   type: "Boton de panico",
@@ -298,34 +298,368 @@ const demoPanicEvent: DashboardEvent = {
   status: "Nuevo"
 };
 
-const defaultVisualScene: VisualScene = {
-  title: "Comando integrado",
-  label: "Centro operativo",
-  detail: "Monitoreo, IA y despacho en una sola vista",
-  image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=84",
-  alt: "Operador trabajando con pantallas de monitoreo",
-  icon: Radio
-};
-
-const visualScenes: VisualScene[] = [
-  defaultVisualScene,
-  {
-    title: "Camara urbana",
-    label: "VisionAI",
-    detail: "Deteccion priorizada para operadores",
-    image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80",
-    alt: "Ciudad iluminada de noche vista desde altura",
-    icon: Camera
+const moduleExperiences: Record<ModuleId, ModuleExperience> = {
+  command: {
+    eyebrow: "Centro operativo",
+    title: "Comando integral con IA, despacho y vision ejecutiva",
+    summary: "Vista ejecutiva y operativa en vivo para vender el valor completo del sistema.",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=84",
+    alt: "Operador trabajando con pantallas de monitoreo",
+    icon: Radio,
+    signals: [
+      { value: "18", label: "eventos activos" },
+      { value: "142", label: "camaras conectadas" },
+      { value: "04m", label: "movil en ruta" }
+    ],
+    scenes: [
+      {
+        title: "Sala de situacion",
+        label: "Comando 24/7",
+        detail: "Vista unificada para operador, supervisor y ejecutivo",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+        alt: "Puesto de operacion con computadora",
+        icon: Radio
+      },
+      {
+        title: "Flujo punta a punta",
+        label: "IA + despacho",
+        detail: "Deteccion, ACK, movil y cierre auditado",
+        image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80",
+        alt: "Equipo trabajando en una sala tecnologica",
+        icon: Route
+      },
+      {
+        title: "Decision politica",
+        label: "Tablero ejecutivo",
+        detail: "Impacto, ahorro y cobertura listos para reunion",
+        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+        alt: "Oficina ejecutiva con mesa de trabajo",
+        icon: BarChart3
+      }
+    ],
+    functions: [
+      { title: "Iniciar simulacion comercial", detail: "Crea un evento critico demostrable", icon: PlayCircle },
+      { title: "Vista ejecutiva", detail: "KPIs, ahorro y paquete piloto", icon: BarChart3 },
+      { title: "Brief operativo", detail: "Resumen para jefe de turno", icon: Radio },
+      { title: "Exportar tablero", detail: "Salida imprimible para reunion", icon: Download }
+    ]
   },
-  {
-    title: "Cobertura satelital",
-    label: "SatellitePatrol",
-    detail: "Focos de calor y zonas rurales",
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
-    alt: "Vista de la Tierra desde el espacio",
-    icon: Satellite
+  events: {
+    eyebrow: "Gestion de incidentes",
+    title: "Eventos con ACK legal, despacho real y cierre con evidencia",
+    summary: "Cada incidente tiene estado, prioridad, operador, unidad asignada y cierre trazable.",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=84",
+    alt: "Ciudad con edificios iluminados",
+    icon: CircleAlert,
+    signals: [
+      { value: "3", label: "criticos" },
+      { value: "2", label: "en ACK" },
+      { value: "1", label: "despachado" }
+    ],
+    scenes: [
+      {
+        title: "Cola prioritaria",
+        label: "Triaging",
+        detail: "Los eventos criticos suben primero",
+        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+        alt: "Distrito urbano de noche",
+        icon: CircleAlert
+      },
+      {
+        title: "Despacho guiado",
+        label: "Movil sugerido",
+        detail: "Unidad mas cercana con ETA visible",
+        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
+        alt: "Calle residencial iluminada",
+        icon: Send
+      },
+      {
+        title: "Cierre probatorio",
+        label: "Resolucion",
+        detail: "Caso cerrado con evidencia y auditoria",
+        image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+        alt: "Documentos de trabajo sobre escritorio",
+        icon: LockKeyhole
+      }
+    ],
+    functions: [
+      { title: "Confirmar ACK", detail: "Operador toma responsabilidad", icon: CheckCircle2 },
+      { title: "Despachar unidad", detail: "Asigna movil con ETA", icon: Send },
+      { title: "Cerrar incidente", detail: "Genera cierre con evidencia", icon: LockKeyhole },
+      { title: "Escalar prioridad", detail: "Marca caso critico supervisado", icon: Siren }
+    ]
+  },
+  cameras: {
+    eyebrow: "VisionAI",
+    title: "Camaras con salud, capacidades IA y accion directa",
+    summary: "Monitoreo de estado, IA activa, LPR, degradacion y mantenimiento por dispositivo.",
+    image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1800&q=84",
+    alt: "Ciudad iluminada de noche vista desde altura",
+    icon: Video,
+    signals: [
+      { value: "142", label: "online" },
+      { value: "25", label: "VisionAI" },
+      { value: "4", label: "degradadas" }
+    ],
+    scenes: [
+      {
+        title: "Anillo urbano",
+        label: "Cobertura",
+        detail: "Camaras organizadas por zona tactica",
+        image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80",
+        alt: "Vista aerea de ciudad de noche",
+        icon: Camera
+      },
+      {
+        title: "IA por camara",
+        label: "Activacion",
+        detail: "Pausar o activar analitica por dispositivo",
+        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+        alt: "Racks de servidores",
+        icon: Eye
+      },
+      {
+        title: "Mantenimiento",
+        label: "Salud",
+        detail: "Degradacion visible antes de perder servicio",
+        image: "https://images.unsplash.com/photo-1581091870622-7c12842b9f4f?auto=format&fit=crop&w=1200&q=80",
+        alt: "Tecnico trabajando con equipamiento",
+        icon: CheckCircle2
+      }
+    ],
+    functions: [
+      { title: "Pausar o activar IA", detail: "Cambia VisionAI en la camara seleccionada", icon: Eye },
+      { title: "Diagnostico de salud", detail: "Estado tecnico y degradacion", icon: CheckCircle2 },
+      { title: "Abrir stream", detail: "Vista operativa de la camara", icon: Video },
+      { title: "Orden de mantenimiento", detail: "Deriva camara degradada", icon: FileText }
+    ]
+  },
+  map: {
+    eyebrow: "Mapa tactico",
+    title: "Capas operativas para eventos, camaras, moviles y zonas calientes",
+    summary: "Mapa vivo con capas accionables para decidir rapido y explicar cobertura.",
+    image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1800&q=84",
+    alt: "Mapa urbano extendido sobre una mesa",
+    icon: MapPin,
+    signals: [
+      { value: "4", label: "capas" },
+      { value: "18", label: "pins activos" },
+      { value: "2", label: "zonas calientes" }
+    ],
+    scenes: [
+      {
+        title: "Eventos + camaras",
+        label: "Pins vivos",
+        detail: "Cruce visual entre fuente y evento",
+        image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80",
+        alt: "Mapa urbano con marcadores",
+        icon: MapPin
+      },
+      {
+        title: "Zonas calientes",
+        label: "Heatmap",
+        detail: "Sectores de mayor recurrencia",
+        image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        alt: "Paisaje urbano visto desde altura",
+        icon: Flame
+      },
+      {
+        title: "Cobertura satelital",
+        label: "Rural",
+        detail: "Focos de calor y areas amplias",
+        image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
+        alt: "Vista de la Tierra desde el espacio",
+        icon: Satellite
+      }
+    ],
+    functions: [
+      { title: "Capa eventos + camaras", detail: "Muestra incidentes sobre fuentes", icon: MapPin },
+      { title: "Capa moviles", detail: "Unidades disponibles y en ruta", icon: Route },
+      { title: "Zonas calientes", detail: "Lectura tactica por recurrencia", icon: Flame },
+      { title: "Cobertura satelital", detail: "Focos rurales y periferia", icon: Satellite }
+    ]
+  },
+  patrols: {
+    eyebrow: "Despacho movil",
+    title: "Moviles con asignacion, ETA, arribo y liberacion operativa",
+    summary: "Gestion de patrullas y unidades con estados claros para operadores y supervisores.",
+    image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1800&q=84",
+    alt: "Calle residencial con vehiculo en circulacion",
+    icon: Users,
+    signals: [
+      { value: "27", label: "libres" },
+      { value: "4", label: "en ruta" },
+      { value: "04m", label: "ETA menor" }
+    ],
+    scenes: [
+      {
+        title: "Asignacion rapida",
+        label: "Unidad cercana",
+        detail: "Despacho basado en zona y ETA",
+        image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1200&q=80",
+        alt: "Calle de barrio iluminada",
+        icon: Send
+      },
+      {
+        title: "Seguimiento",
+        label: "ETA vivo",
+        detail: "Estado en ruta, en sitio o disponible",
+        image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+        alt: "Ruta y ciudad vista desde altura",
+        icon: Route
+      },
+      {
+        title: "Turno operativo",
+        label: "Dotacion",
+        detail: "Moviles por area y disponibilidad",
+        image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+        alt: "Equipo trabajando en oficina operativa",
+        icon: Users
+      }
+    ],
+    functions: [
+      { title: "Asignar al evento", detail: "Despacha el movil seleccionado", icon: Send },
+      { title: "Marcar arribo", detail: "Unidad en sitio con ETA cero", icon: CheckCircle2 },
+      { title: "Liberar unidad", detail: "Vuelve a disponible", icon: Route },
+      { title: "Brief de turno", detail: "Resumen de dotacion por area", icon: FileText }
+    ]
+  },
+  evidence: {
+    eyebrow: "Evidencia digital",
+    title: "Cadena de custodia, hash y expediente listo para auditoria",
+    summary: "Archivos, cierres, hashes y responsables organizados para sostener valor legal.",
+    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1800&q=84",
+    alt: "Documentos legales y lapicera sobre escritorio",
+    icon: LockKeyhole,
+    signals: [
+      { value: "Hash", label: "encadenado" },
+      { value: "12", label: "archivos" },
+      { value: "100%", label: "custodia" }
+    ],
+    scenes: [
+      {
+        title: "Expediente probatorio",
+        label: "Caso",
+        detail: "Evidencia vinculada al incidente",
+        image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+        alt: "Documentos de caso",
+        icon: FileText
+      },
+      {
+        title: "Hash verificable",
+        label: "Integridad",
+        detail: "Firma y cadena inmutable",
+        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+        alt: "Infraestructura de servidores",
+        icon: LockKeyhole
+      },
+      {
+        title: "Custodia legal",
+        label: "Auditable",
+        detail: "Usuario, hora y tenant por accion",
+        image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80",
+        alt: "Personas revisando documentos",
+        icon: Gavel
+      }
+    ],
+    functions: [
+      { title: "Ver hash del caso", detail: "Integridad del expediente", icon: LockKeyhole },
+      { title: "Cadena de custodia", detail: "Usuario, tenant y timestamp", icon: Gavel },
+      { title: "Adjuntar evidencia", detail: "Video, foto o documento", icon: FileText },
+      { title: "Cerrar expediente", detail: "Bloquea caso con resolucion", icon: CheckCircle2 }
+    ]
+  },
+  reports: {
+    eyebrow: "Inteligencia ejecutiva",
+    title: "Reportes para ministros, municipios, licitaciones y seguimiento",
+    summary: "Salidas listas para decision: ejecutivo, operativo, licitacion y cumplimiento.",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1800&q=84",
+    alt: "Panel de analitica con graficos",
+    icon: FileText,
+    signals: [
+      { value: "PDF", label: "ejecutivo" },
+      { value: "90d", label: "piloto" },
+      { value: "58%", label: "ahorro" }
+    ],
+    scenes: [
+      {
+        title: "Reporte ejecutivo",
+        label: "Decision",
+        detail: "Impacto, cobertura y ahorro",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+        alt: "Graficos y analitica",
+        icon: BarChart3
+      },
+      {
+        title: "Carpeta licitacion",
+        label: "Compra publica",
+        detail: "Arquitectura, alcance y soberania",
+        image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+        alt: "Documentacion de negocio",
+        icon: FileText
+      },
+      {
+        title: "Operacion diaria",
+        label: "24 horas",
+        detail: "Eventos, tiempos y resoluciones",
+        image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+        alt: "Equipo reunido en oficina",
+        icon: Clock3
+      }
+    ],
+    functions: [
+      { title: "Generar ejecutivo", detail: "PDF para reunion politica", icon: Download },
+      { title: "Generar licitacion", detail: "Alcance y arquitectura", icon: FileText },
+      { title: "Reporte operativo", detail: "Turno, eventos y tiempos", icon: BarChart3 },
+      { title: "Exportar metricas", detail: "Datos para seguimiento", icon: CheckCircle2 }
+    ]
+  },
+  audit: {
+    eyebrow: "Trazabilidad legal",
+    title: "Auditoria por usuario, permiso, accion sensible y tenant",
+    summary: "Registro legal de acciones criticas para compras publicas, seguridad y cumplimiento.",
+    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1800&q=84",
+    alt: "Personas revisando documentos de cumplimiento",
+    icon: Gavel,
+    signals: [
+      { value: "100%", label: "trazable" },
+      { value: "8", label: "usuarios" },
+      { value: "Hash", label: "chain" }
+    ],
+    scenes: [
+      {
+        title: "Log sensible",
+        label: "Auditoria",
+        detail: "ACK, despacho, cierre y permisos",
+        image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=80",
+        alt: "Revision documental",
+        icon: Gavel
+      },
+      {
+        title: "Roles y permisos",
+        label: "Gobierno",
+        detail: "Operador, supervisor y administrador",
+        image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+        alt: "Equipo en sala de control",
+        icon: Users
+      },
+      {
+        title: "Infraestructura soberana",
+        label: "Compliance",
+        detail: "Datos locales y control por tenant",
+        image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+        alt: "Centro de datos con servidores",
+        icon: Shield
+      }
+    ],
+    functions: [
+      { title: "Ver log legal", detail: "Acciones sensibles recientes", icon: Gavel },
+      { title: "Revisar usuarios", detail: "Roles por organismo", icon: Users },
+      { title: "Validar permisos", detail: "Control por modulo", icon: Shield },
+      { title: "Exportar auditoria", detail: "Informe para cumplimiento", icon: Download }
+    ]
   }
-];
+};
 
 async function patchApi<TResponse>(
   path: string,
@@ -362,7 +696,6 @@ export default function Page() {
   const [sessionState, setSessionState] = useState("Modo visual");
   const [selectedTenant, setSelectedTenant] = useState<DemoTenant>(defaultTenant);
   const [demoRunning, setDemoRunning] = useState(false);
-  const [selectedVisualScene, setSelectedVisualScene] = useState(0);
   const [activeModule, setActiveModule] = useState<ModuleId>("command");
   const [selectedEventId, setSelectedEventId] = useState(fallbackEvents[0]?.id ?? demoPanicEvent.id);
   const [selectedCameraName, setSelectedCameraName] = useState(fallbackCameras[0]?.name ?? "COM-000");
@@ -370,7 +703,11 @@ export default function Page() {
   const [selectedMapLayer, setSelectedMapLayer] = useState("Eventos + camaras");
   const selectedTenantProfile: TenantProfile =
     tenantProfiles[selectedTenant] ?? tenantProfiles[defaultTenant];
-  const activeVisualScene = visualScenes[selectedVisualScene] ?? defaultVisualScene;
+  const activeModuleExperience = moduleExperiences[activeModule];
+  const ActiveModuleIcon = activeModuleExperience.icon;
+  const PrimarySceneIcon = activeModuleExperience.scenes[0]?.icon ?? ActiveModuleIcon;
+  const SecondarySceneIcon = activeModuleExperience.scenes[1]?.icon ?? Route;
+  const TertiarySceneIcon = activeModuleExperience.scenes[2]?.icon ?? Satellite;
   const selectedEvent: DashboardEvent =
     events.find((event) => event.id === selectedEventId) ?? fallbackEvents[0] ?? demoPanicEvent;
   const selectedCamera: DashboardCamera =
@@ -577,6 +914,232 @@ export default function Page() {
     setSessionState(`Mapa centrado en ${label}`);
   };
 
+  const markPatrolArrived = (patrolCode: string) => {
+    setPatrols((currentPatrols) =>
+      currentPatrols.map((patrol) =>
+        patrol.code === patrolCode ? { ...patrol, status: "En sitio", eta: "00m" } : patrol
+      )
+    );
+    setSelectedPatrolCode(patrolCode);
+    setActiveModule("patrols");
+    setSessionState(`Movil ${patrolCode} marcado en sitio`);
+  };
+
+  const releasePatrol = (patrolCode: string) => {
+    setPatrols((currentPatrols) =>
+      currentPatrols.map((patrol) =>
+        patrol.code === patrolCode ? { ...patrol, status: "Disponible", eta: "00m" } : patrol
+      )
+    );
+    setSelectedPatrolCode(patrolCode);
+    setActiveModule("patrols");
+    setSessionState(`Movil ${patrolCode} disponible`);
+  };
+
+  const runModuleFunction = (moduleId: ModuleId, functionTitle: string) => {
+    if (moduleId === "command" && functionTitle === "Iniciar simulacion comercial") {
+      startDemoSimulation();
+      return;
+    }
+
+    if (moduleId === "events" && functionTitle === "Confirmar ACK") {
+      void acknowledgeEvent(selectedEvent.id);
+      return;
+    }
+
+    if (moduleId === "events" && functionTitle === "Despachar unidad") {
+      void dispatchEvent(selectedEvent.id, selectedPatrol.code);
+      return;
+    }
+
+    if (moduleId === "events" && functionTitle === "Cerrar incidente") {
+      void closeEvent(selectedEvent.id);
+      return;
+    }
+
+    if (moduleId === "cameras" && functionTitle === "Pausar o activar IA") {
+      void toggleCameraAi(selectedCamera.name);
+      return;
+    }
+
+    if (moduleId === "map") {
+      centerMapOn(functionTitle.replace("Capa ", ""));
+      return;
+    }
+
+    if (moduleId === "patrols" && functionTitle === "Asignar al evento") {
+      void dispatchEvent(selectedEvent.id, selectedPatrol.code);
+      return;
+    }
+
+    if (moduleId === "patrols" && functionTitle === "Marcar arribo") {
+      markPatrolArrived(selectedPatrol.code);
+      return;
+    }
+
+    if (moduleId === "patrols" && functionTitle === "Liberar unidad") {
+      releasePatrol(selectedPatrol.code);
+      return;
+    }
+
+    if (moduleId === "evidence" && functionTitle === "Cerrar expediente") {
+      void closeEvent(selectedEvent.id);
+      return;
+    }
+
+    if (moduleId === "reports" && functionTitle.includes("Generar")) {
+      window.print();
+    }
+
+    setSessionState(functionTitle);
+  };
+
+  const renderModuleToolbar = () => {
+    if (activeModule === "command") {
+      return (
+        <>
+          <button type="button" onClick={startDemoSimulation}>
+            <PlayCircle size={16} aria-hidden />
+            Simular caso
+          </button>
+          <button type="button" onClick={() => centerMapOn(selectedEvent.zone)}>
+            <MapPin size={16} aria-hidden />
+            Ver mapa
+          </button>
+          <button type="button" onClick={() => window.print()}>
+            <Download size={16} aria-hidden />
+            Exportar tablero
+          </button>
+        </>
+      );
+    }
+
+    if (activeModule === "events") {
+      return (
+        <>
+          <button type="button" onClick={() => acknowledgeEvent(selectedEvent.id)}>
+            <CheckCircle2 size={16} aria-hidden />
+            ACK
+          </button>
+          <button type="button" onClick={() => dispatchEvent(selectedEvent.id, selectedPatrol.code)}>
+            <Send size={16} aria-hidden />
+            Despachar
+          </button>
+          <button type="button" onClick={() => closeEvent(selectedEvent.id)}>
+            <LockKeyhole size={16} aria-hidden />
+            Cerrar
+          </button>
+        </>
+      );
+    }
+
+    if (activeModule === "cameras") {
+      return (
+        <>
+          <button type="button" onClick={() => toggleCameraAi(selectedCamera.name)}>
+            {selectedCamera.aiEnabled ? <XCircle size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+            {selectedCamera.aiEnabled ? "Pausar IA" : "Activar IA"}
+          </button>
+          <button type="button" onClick={() => centerMapOn(selectedCamera.name)}>
+            <MapPin size={16} aria-hidden />
+            Ubicar camara
+          </button>
+          <button type="button" onClick={() => setSessionState(`Stream abierto: ${selectedCamera.name}`)}>
+            <Video size={16} aria-hidden />
+            Abrir stream
+          </button>
+        </>
+      );
+    }
+
+    if (activeModule === "map") {
+      return (
+        <>
+          {["Eventos + camaras", "Moviles", "Zonas calientes"].map((layer) => (
+            <button key={layer} type="button" onClick={() => centerMapOn(layer)}>
+              <MapPin size={16} aria-hidden />
+              {layer}
+            </button>
+          ))}
+        </>
+      );
+    }
+
+    if (activeModule === "patrols") {
+      return (
+        <>
+          <button type="button" onClick={() => dispatchEvent(selectedEvent.id, selectedPatrol.code)}>
+            <Send size={16} aria-hidden />
+            Asignar
+          </button>
+          <button type="button" onClick={() => markPatrolArrived(selectedPatrol.code)}>
+            <CheckCircle2 size={16} aria-hidden />
+            Arribo
+          </button>
+          <button type="button" onClick={() => releasePatrol(selectedPatrol.code)}>
+            <Route size={16} aria-hidden />
+            Liberar
+          </button>
+        </>
+      );
+    }
+
+    if (activeModule === "evidence") {
+      return (
+        <>
+          <button type="button" onClick={() => setSessionState(`Hash verificado: ${selectedEvent.id}`)}>
+            <LockKeyhole size={16} aria-hidden />
+            Ver hash
+          </button>
+          <button type="button" onClick={() => setSessionState("Cadena de custodia abierta")}>
+            <Gavel size={16} aria-hidden />
+            Custodia
+          </button>
+          <button type="button" onClick={() => closeEvent(selectedEvent.id)}>
+            <CheckCircle2 size={16} aria-hidden />
+            Cerrar caso
+          </button>
+        </>
+      );
+    }
+
+    if (activeModule === "reports") {
+      return (
+        <>
+          <button type="button" onClick={() => window.print()}>
+            <Download size={16} aria-hidden />
+            Ejecutivo
+          </button>
+          <button type="button" onClick={() => setSessionState("Carpeta de licitacion generada")}>
+            <FileText size={16} aria-hidden />
+            Licitacion
+          </button>
+          <button type="button" onClick={() => setSessionState("Metricas operativas exportadas")}>
+            <BarChart3 size={16} aria-hidden />
+            Metricas
+          </button>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <button type="button" onClick={() => setSessionState("Log legal abierto")}>
+          <Gavel size={16} aria-hidden />
+          Log legal
+        </button>
+        <button type="button" onClick={() => setSessionState("Permisos revisados")}>
+          <Shield size={16} aria-hidden />
+          Permisos
+        </button>
+        <button type="button" onClick={() => window.print()}>
+          <Download size={16} aria-hidden />
+          Exportar auditoria
+        </button>
+      </>
+    );
+  };
+
   return (
     <main className="command-shell">
       <aside className="sidebar" aria-label="Navegacion principal">
@@ -649,75 +1212,62 @@ export default function Page() {
           })}
         </section>
 
-        <section className="active-module-panel" aria-label="Modulo activo">
+        <section className={`active-module-panel module-${activeModule}`} aria-label="Modulo activo">
           <div>
-            <p className="eyebrow">{activeModule}</p>
-            <h2>{moduleNav.find((module) => module.id === activeModule)?.label}</h2>
-            <span>{moduleSummaries[activeModule]}</span>
+            <p className="eyebrow">{activeModuleExperience.eyebrow}</p>
+            <h2>{activeModuleExperience.title}</h2>
+            <span>{activeModuleExperience.summary}</span>
           </div>
           <div className="module-actions">
-            <button type="button" onClick={() => centerMapOn(selectedEvent?.zone ?? "evento critico")}>
-              <MapPin size={16} aria-hidden />
-              Centrar mapa
-            </button>
-            <button type="button" onClick={() => window.print()}>
-              <Download size={16} aria-hidden />
-              Exportar
-            </button>
+            {renderModuleToolbar()}
           </div>
         </section>
 
-        <section className="visual-command" aria-label="Vista visual del sistema">
+        <section className={`visual-command module-${activeModule}`} aria-label="Vista visual del sistema">
           <article className="hero-visual">
-            <img src={activeVisualScene.image} alt={activeVisualScene.alt} />
+            <img src={activeModuleExperience.image} alt={activeModuleExperience.alt} />
             <div className="holo-stage" aria-hidden="true">
               <span className="holo-ring" />
               <span className="holo-node node-camera">
-                <Camera size={20} />
-                <small>VisionAI</small>
+                <PrimarySceneIcon size={20} />
+                <small>{activeModuleExperience.scenes[0]?.label ?? activeModuleExperience.eyebrow}</small>
               </span>
               <span className="holo-node node-dispatch">
-                <Route size={20} />
-                <small>Despacho</small>
+                <SecondarySceneIcon size={20} />
+                <small>{activeModuleExperience.scenes[1]?.label ?? "Operacion"}</small>
               </span>
               <span className="holo-node node-satellite">
-                <Satellite size={20} />
-                <small>Satelite</small>
+                <TertiarySceneIcon size={20} />
+                <small>{activeModuleExperience.scenes[2]?.label ?? "Cobertura"}</small>
               </span>
               <span className="holo-node node-evidence">
-                <LockKeyhole size={20} />
-                <small>Evidencia</small>
+                <ActiveModuleIcon size={20} />
+                <small>{moduleNav.find((module) => module.id === activeModule)?.label}</small>
               </span>
             </div>
             <div className="hero-visual-overlay">
-              <p className="eyebrow">{activeVisualScene.label}</p>
-              <h2>Guardian360 se ve como un centro de comando real</h2>
+              <p className="eyebrow">{activeModuleExperience.eyebrow}</p>
+              <h2>{activeModuleExperience.title}</h2>
               <div className="hero-signal-grid">
-                <span>
-                  <strong>18</strong>
-                  eventos activos
-                </span>
-                <span>
-                  <strong>142</strong>
-                  camaras conectadas
-                </span>
-                <span>
-                  <strong>04m</strong>
-                  movil en ruta
-                </span>
+                {activeModuleExperience.signals.map((signal) => (
+                  <span key={`${signal.value}-${signal.label}`}>
+                    <strong>{signal.value}</strong>
+                    {signal.label}
+                  </span>
+                ))}
               </div>
             </div>
           </article>
 
           <div className="scene-strip">
-            {visualScenes.map((scene, index) => {
+            {activeModuleExperience.scenes.map((scene, index) => {
               const Icon = scene.icon;
               return (
                 <button
-                  className={`scene-card ${index === selectedVisualScene ? "active" : ""}`}
+                  className={`scene-card ${index === 0 ? "active" : ""}`}
                   key={scene.title}
                   type="button"
-                  onClick={() => setSelectedVisualScene(index)}
+                  onClick={() => setSessionState(scene.title)}
                 >
                   <img src={scene.image} alt={scene.alt} />
                   <div>
@@ -935,22 +1485,7 @@ export default function Page() {
             </div>
 
             <div className="action-row">
-              <button type="button" onClick={() => acknowledgeEvent(selectedEvent.id)}>
-                <CheckCircle2 size={16} aria-hidden />
-                ACK
-              </button>
-              <button type="button" onClick={() => dispatchEvent(selectedEvent.id, selectedPatrol.code)}>
-                <Send size={16} aria-hidden />
-                Despachar
-              </button>
-              <button type="button" onClick={() => closeEvent(selectedEvent.id)}>
-                <LockKeyhole size={16} aria-hidden />
-                Cerrar
-              </button>
-              <button type="button" onClick={() => toggleCameraAi(selectedCamera.name)}>
-                {selectedCamera.aiEnabled ? <XCircle size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
-                {selectedCamera.aiEnabled ? "Pausar IA" : "Activar IA"}
-              </button>
+              {renderModuleToolbar()}
             </div>
           </article>
 
@@ -1014,12 +1549,22 @@ export default function Page() {
 
             {activeModule === "evidence" || activeModule === "reports" || activeModule === "audit" || activeModule === "command" ? (
               <div className="function-list">
-                {generalFunctions.map(([title, detail]) => (
-                  <button key={title} type="button" onClick={() => setSessionState(title)}>
-                    <span>{title}</span>
-                    <small>{detail}</small>
+                {activeModuleExperience.functions.map((moduleFunction) => {
+                  const Icon = moduleFunction.icon;
+                  return (
+                  <button
+                    key={moduleFunction.title}
+                    type="button"
+                    onClick={() => runModuleFunction(activeModule, moduleFunction.title)}
+                  >
+                    <Icon size={17} aria-hidden />
+                    <div>
+                      <span>{moduleFunction.title}</span>
+                      <small>{moduleFunction.detail}</small>
+                    </div>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             ) : null}
           </article>
