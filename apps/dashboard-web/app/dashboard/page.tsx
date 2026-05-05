@@ -918,7 +918,12 @@ export default function Page() {
 
     const token = window.localStorage.getItem("guardian360.accessToken");
     if (!token) {
-      setSessionState("Inicia sesion para datos reales");
+      window.localStorage.setItem("guardian360.demoSession", "true");
+      window.localStorage.setItem(
+        "guardian360.user",
+        JSON.stringify({ fullName: "Modo visual", role: "DEMO_OPERATOR" })
+      );
+      setSessionState("Modo visual demo");
       return;
     }
 
