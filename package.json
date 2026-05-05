@@ -1,0 +1,29 @@
+{
+  "name": "guardian360",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma SaaS B2G de seguridad ciudadana e inteligencia urbana con IA.",
+  "engines": {
+    "node": ">=20.11.0 <21",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml,css}\"",
+    "db:generate": "pnpm --filter @guardian360/backend-nestjs prisma:generate",
+    "db:seed": "pnpm --filter @guardian360/backend-nestjs prisma:seed",
+    "prod:check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@guardian360/shared-config": "workspace:*",
+    "prettier": "^3.3.3",
+    "turbo": "^2.0.14",
+    "typescript": "^5.5.4"
+  }
+}

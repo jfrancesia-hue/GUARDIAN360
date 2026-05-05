@@ -1,0 +1,13 @@
+{
+  "name": "@guardian360/shared-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"Shared UI se completa en el sprint de dashboard\"",
+    "dev": "echo \"Shared UI se completa en el sprint de dashboard\"",
+    "lint": "echo \"Shared UI sin fuentes todavia\"",
+    "test": "echo \"Shared UI sin tests todavia\"",
+    "typecheck": "echo \"Shared UI sin fuentes todavia\""
+  }
+}

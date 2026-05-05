@@ -1,0 +1,40 @@
+services:
+  backend-nestjs:
+    build:
+      target: production
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  backend-laravel:
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    restart: unless-stopped
+
+  dashboard-web:
+    build:
+      target: production
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  postgres:
+    restart: unless-stopped
+    ports: []
+
+  redis:
+    restart: unless-stopped
+    ports: []
+
+  minio:
+    restart: unless-stopped
+    ports: []
+
+  prometheus:
+    restart: unless-stopped
+    ports: []
+
+  grafana:
+    restart: unless-stopped
+    ports: []

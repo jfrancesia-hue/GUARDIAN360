@@ -1,0 +1,8 @@
+{
+  "extends": "@guardian360/shared-config/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"]
+}

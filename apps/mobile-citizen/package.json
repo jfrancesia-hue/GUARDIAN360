@@ -1,0 +1,12 @@
+{
+  "name": "@guardian360/mobile-citizen",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"Expo build se configura en el sprint ciudadano\"",
+    "dev": "echo \"Expo app se inicializa en el sprint ciudadano\"",
+    "lint": "echo \"Sin fuentes mobile todavia\"",
+    "test": "echo \"Sin tests mobile todavia\"",
+    "typecheck": "echo \"Sin TypeScript mobile todavia\""
+  }
+}

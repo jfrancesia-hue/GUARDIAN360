@@ -1,0 +1,12 @@
+{
+  "name": "@guardian360/i18n-strings",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"Strings compartidos se completan con dashboard y mobile\"",
+    "lint": "echo \"Sin strings todavia\"",
+    "test": "echo \"Sin tests todavia\"",
+    "typecheck": "echo \"Sin TypeScript todavia\""
+  }
+}

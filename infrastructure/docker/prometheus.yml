@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "backend-nestjs"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["backend-nestjs:3001"]
+
+  - job_name: "vision-ai"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["vision-ai:8001"]
+
+  - job_name: "satellite-patrol"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["satellite-patrol:8002"]

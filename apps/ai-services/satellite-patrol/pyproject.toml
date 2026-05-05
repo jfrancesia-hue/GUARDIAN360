@@ -1,0 +1,8 @@
+[project]
+name = "guardian360-satellite-patrol"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["fastapi>=0.111.0", "uvicorn[standard]>=0.30.0", "structlog>=24.2.0", "prometheus-client>=0.20.0"]
+
+[tool.ruff]
+line-length = 100

@@ -1,0 +1,473 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TenantType {
+  PROVINCE
+  MUNICIPALITY
+  AGENCY
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  OPERATOR
+  OFFICER
+  ANALYST
+  CITIZEN
+}
+
+enum CameraStatus {
+  ONLINE
+  OFFLINE
+  DEGRADED
+  MAINTENANCE
+}
+
+enum EventType {
+  WEAPON
+  FIGHT
+  FALL
+  LICENSE_PLATE
+  PANIC_BUTTON
+  FIRE_HOTSPOT
+  MINING_ACTIVITY
+  BORDER_ALERT
+  CUSTOMS_ALERT
+  TRAFFIC_INCIDENT
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum EventStatus {
+  NEW
+  ACKNOWLEDGED
+  DISPATCHED
+  RESOLVED
+  FALSE_POSITIVE
+}
+
+enum DetectionType {
+  PERSON
+  VEHICLE
+  LICENSE_PLATE
+  WEAPON
+  SMOKE
+  FIRE
+  CROWD
+}
+
+enum DispatchStatus {
+  PENDING
+  ASSIGNED
+  EN_ROUTE
+  ARRIVED
+  CLOSED
+  CANCELLED
+}
+
+enum CitizenReportStatus {
+  RECEIVED
+  UNDER_REVIEW
+  DISPATCHED
+  RESOLVED
+  REJECTED
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  ACKNOWLEDGE
+  DISPATCH
+  EXPORT
+}
+
+model Tenant {
+  id              String           @id @default(uuid())
+  name            String
+  slug            String           @unique
+  type            TenantType
+  modules         String[]
+  settings        Json
+  legalEntity     String
+  contactEmail    String
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  users           User[]
+  cameras         Camera[]
+  events          Event[]
+  detections      Detection[]
+  vehicles        Vehicle[]
+  dispatches      Dispatch[]
+  citizens        Citizen[]
+  reports         CitizenReport[]
+  aois            AreaOfInterest[]
+  satelliteImages SatelliteImage[]
+  fireHotspots    FireHotspot[]
+  miningAlerts    MiningAlert[]
+  agroIndices     AgroIndex[]
+  borderAlerts    BorderAlert[]
+  customsAlerts   CustomsAlert[]
+  riskZones       RiskZone[]
+  auditLogs       AuditLog[]
+}
+
+model User {
+  id                 String     @id @default(uuid())
+  tenantId           String
+  email              String
+  passwordHash       String
+  fullName           String
+  role               UserRole
+  agency             String?
+  badge              String?
+  phoneNumber        String?
+  active             Boolean    @default(true)
+  lastLoginAt        DateTime?
+  mfaEnabled         Boolean    @default(false)
+  mfaSecret          String?
+  refreshTokenHash   String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  deletedAt          DateTime?
+  tenant             Tenant     @relation(fields: [tenantId], references: [id])
+  auditLogs          AuditLog[]
+  acknowledgedEvents Event[]    @relation("AcknowledgedBy")
+  dispatches         Dispatch[] @relation("AssignedOfficer")
+
+  @@unique([tenantId, email])
+  @@index([tenantId, role, active])
+}
+
+model Camera {
+  id           String                         @id @default(uuid())
+  tenantId     String
+  externalId   String
+  name         String
+  rtspUrl      String
+  location     Unsupported("geometry(Point, 4326)")
+  address      String?
+  zone         String?
+  capabilities String[]
+  status       CameraStatus                   @default(OFFLINE)
+  resolution   String?
+  fps          Int?
+  edgeDeviceId String?
+  installedAt  DateTime?
+  lastFrameAt  DateTime?
+  createdAt    DateTime                       @default(now())
+  updatedAt    DateTime                       @updatedAt
+  deletedAt    DateTime?
+  tenant       Tenant                         @relation(fields: [tenantId], references: [id])
+  events       Event[]
+  detections   Detection[]
+
+  @@unique([tenantId, externalId])
+  @@index([tenantId, status])
+}
+
+model Event {
+  id               String                         @id @default(uuid())
+  tenantId         String
+  cameraId         String?
+  citizenReportId  String?
+  type             EventType
+  severity         Severity
+  status           EventStatus                    @default(NEW)
+  confidence       Float?
+  location         Unsupported("geometry(Point, 4326)")?
+  metadata         Json
+  thumbnailUrl     String?
+  videoClipUrl     String?
+  occurredAt       DateTime
+  detectedAt       DateTime                       @default(now())
+  acknowledgedAt   DateTime?
+  acknowledgedById String?
+  resolvedAt       DateTime?
+  createdAt        DateTime                       @default(now())
+  updatedAt        DateTime                       @updatedAt
+  deletedAt        DateTime?
+  tenant           Tenant                         @relation(fields: [tenantId], references: [id])
+  camera           Camera?                        @relation(fields: [cameraId], references: [id])
+  citizenReport    CitizenReport?                 @relation(fields: [citizenReportId], references: [id])
+  acknowledgedBy   User?                          @relation("AcknowledgedBy", fields: [acknowledgedById], references: [id])
+  detections       Detection[]
+  dispatches       Dispatch[]
+
+  @@index([tenantId, status, severity])
+  @@index([tenantId, occurredAt])
+}
+
+model Detection {
+  id          String        @id @default(uuid())
+  tenantId    String
+  cameraId    String
+  eventId     String?
+  type        DetectionType
+  label       String
+  confidence  Float
+  boundingBox Json
+  metadata    Json
+  frameUrl    String?
+  detectedAt  DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  camera      Camera        @relation(fields: [cameraId], references: [id])
+  event       Event?        @relation(fields: [eventId], references: [id])
+
+  @@index([tenantId, cameraId, detectedAt])
+}
+
+model Vehicle {
+  id          String    @id @default(uuid())
+  tenantId    String
+  plate       String
+  make        String?
+  model       String?
+  color       String?
+  wanted      Boolean   @default(false)
+  wantedCause String?
+  metadata    Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, plate])
+  @@index([tenantId, wanted])
+}
+
+model Dispatch {
+  id                String         @id @default(uuid())
+  tenantId          String
+  eventId           String
+  assignedOfficerId String?
+  status            DispatchStatus @default(PENDING)
+  priority          Severity
+  notes             String?
+  assignedAt        DateTime?
+  arrivedAt         DateTime?
+  closedAt          DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  deletedAt         DateTime?
+  tenant            Tenant         @relation(fields: [tenantId], references: [id])
+  event             Event          @relation(fields: [eventId], references: [id])
+  assignedOfficer   User?          @relation("AssignedOfficer", fields: [assignedOfficerId], references: [id])
+
+  @@index([tenantId, status, priority])
+}
+
+model Citizen {
+  id              String          @id @default(uuid())
+  tenantId        String
+  dni             String?
+  phoneNumber     String
+  fullName        String?
+  verifiedAt      DateTime?
+  consentSettings Json
+  active          Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+  tenant          Tenant          @relation(fields: [tenantId], references: [id])
+  reports         CitizenReport[]
+
+  @@unique([tenantId, phoneNumber])
+  @@index([tenantId, active])
+}
+
+model CitizenReport {
+  id          String              @id @default(uuid())
+  tenantId    String
+  citizenId   String?
+  type        EventType
+  status      CitizenReportStatus @default(RECEIVED)
+  description String
+  location    Unsupported("geometry(Point, 4326)")?
+  mediaUrls   String[]
+  anonymous   Boolean             @default(false)
+  metadata    Json
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deletedAt   DateTime?
+  tenant      Tenant              @relation(fields: [tenantId], references: [id])
+  citizen     Citizen?            @relation(fields: [citizenId], references: [id])
+  events      Event[]
+
+  @@index([tenantId, status, createdAt])
+}
+
+model AreaOfInterest {
+  id          String                          @id @default(uuid())
+  tenantId    String
+  name        String
+  category    String
+  geometry    Unsupported("geometry(Polygon, 4326)")
+  metadata    Json
+  active      Boolean                         @default(true)
+  createdAt   DateTime                        @default(now())
+  updatedAt   DateTime                        @updatedAt
+  deletedAt   DateTime?
+  tenant      Tenant                          @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, active])
+}
+
+model SatelliteImage {
+  id          String    @id @default(uuid())
+  tenantId    String
+  provider    String
+  sceneId     String
+  capturedAt  DateTime
+  footprint   Unsupported("geometry(Polygon, 4326)")?
+  bands       String[]
+  assetUrl    String
+  metadata    Json
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, sceneId])
+}
+
+model FireHotspot {
+  id          String                         @id @default(uuid())
+  tenantId    String
+  location    Unsupported("geometry(Point, 4326)")
+  confidence  Float
+  temperature Float?
+  source      String
+  detectedAt  DateTime
+  metadata    Json
+  createdAt   DateTime                       @default(now())
+  updatedAt   DateTime                       @updatedAt
+  deletedAt   DateTime?
+  tenant      Tenant                         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, detectedAt])
+}
+
+model MiningAlert {
+  id         String                         @id @default(uuid())
+  tenantId   String
+  area       Unsupported("geometry(Polygon, 4326)")
+  severity   Severity
+  status     EventStatus                    @default(NEW)
+  metadata   Json
+  detectedAt DateTime
+  createdAt  DateTime                       @default(now())
+  updatedAt  DateTime                       @updatedAt
+  deletedAt  DateTime?
+  tenant     Tenant                         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status, severity])
+}
+
+model AgroIndex {
+  id        String                         @id @default(uuid())
+  tenantId  String
+  area      Unsupported("geometry(Polygon, 4326)")
+  indexName String
+  value     Float
+  measuredAt DateTime
+  metadata  Json
+  createdAt DateTime                       @default(now())
+  updatedAt DateTime                       @updatedAt
+  deletedAt DateTime?
+  tenant    Tenant                         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, indexName, measuredAt])
+}
+
+model BorderAlert {
+  id         String                         @id @default(uuid())
+  tenantId   String
+  location   Unsupported("geometry(Point, 4326)")
+  severity   Severity
+  status     EventStatus                    @default(NEW)
+  metadata   Json
+  detectedAt DateTime
+  createdAt  DateTime                       @default(now())
+  updatedAt  DateTime                       @updatedAt
+  deletedAt  DateTime?
+  tenant     Tenant                         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status, detectedAt])
+}
+
+model CustomsAlert {
+  id         String      @id @default(uuid())
+  tenantId   String
+  shipmentId String?
+  severity   Severity
+  status     EventStatus @default(NEW)
+  metadata   Json
+  detectedAt DateTime
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status, detectedAt])
+}
+
+model RiskZone {
+  id        String                         @id @default(uuid())
+  tenantId  String
+  name      String
+  type      String
+  severity  Severity
+  geometry  Unsupported("geometry(Polygon, 4326)")
+  metadata  Json
+  active    Boolean                        @default(true)
+  createdAt DateTime                       @default(now())
+  updatedAt DateTime                       @updatedAt
+  deletedAt DateTime?
+  tenant    Tenant                         @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, active, severity])
+}
+
+model AuditLog {
+  id             String      @id @default(uuid())
+  tenantId       String
+  userId         String?
+  action         AuditAction
+  entityType     String
+  entityId       String?
+  ipAddress      String?
+  userAgent      String?
+  correlationId  String
+  metadata       Json
+  previousHash   String?
+  hash           String
+  blockchainTxId String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+  tenant         Tenant      @relation(fields: [tenantId], references: [id])
+  user           User?       @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, action, createdAt])
+  @@index([correlationId])
+}

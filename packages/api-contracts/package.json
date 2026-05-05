@@ -1,0 +1,12 @@
+{
+  "name": "@guardian360/api-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"OpenAPI se genera desde backend-nestjs\"",
+    "lint": "echo \"Sin contratos estaticos todavia\"",
+    "test": "echo \"Sin tests de contratos todavia\"",
+    "typecheck": "echo \"Sin TypeScript todavia\""
+  }
+}
