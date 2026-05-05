@@ -1,13 +1,20 @@
 "use client";
 
 import {
+  BarChart3,
   Bell,
+  Building2,
   Camera,
   CheckCircle2,
   CircleAlert,
   Clock3,
+  Download,
+  FileText,
   Flame,
+  Gavel,
+  LockKeyhole,
   MapPin,
+  PlayCircle,
   Radio,
   Route,
   Satellite,
@@ -16,6 +23,7 @@ import {
   Users,
   Video
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -51,6 +59,15 @@ interface CameraOverview {
   degraded: number;
 }
 
+interface DashboardEvent {
+  type: string;
+  zone: string;
+  source: string;
+  severity: string;
+  time: string;
+  icon: LucideIcon;
+}
+
 const fallbackKpis = [
   { label: "Eventos activos", value: "18", trend: "+4", state: "critical" },
   { label: "Camaras online", value: "142", trend: "96%", state: "ok" },
@@ -58,7 +75,7 @@ const fallbackKpis = [
   { label: "Moviles libres", value: "27", trend: "+3", state: "ok" }
 ];
 
-const fallbackEvents = [
+const fallbackEvents: DashboardEvent[] = [
   {
     type: "Arma detectada",
     zone: "Av. Güemes y Vicario Segura",
@@ -99,12 +116,43 @@ const fallbackCameras = [
   { name: "COM-102", zone: "Terminal", status: "IA activa", health: 99 }
 ];
 
+const demoTenants = [
+  "Catamarca Provincia",
+  "Municipalidad SFVC",
+  "Valle Viejo",
+  "Salta Demo"
+];
+
+const executiveMetrics = [
+  { label: "Respuesta promedio", value: "04:18", detail: "36% mas rapido" },
+  { label: "Cobertura urbana", value: "91%", detail: "142 camaras activas" },
+  { label: "Incidentes resueltos", value: "64", detail: "ultimas 24 horas" },
+  { label: "Ahorro estimado", value: "58%", detail: "vs suite importada" }
+];
+
+const eventFlow = [
+  { title: "IA detecta", detail: "Arma en via publica", icon: Siren, state: "done" },
+  { title: "Operador confirma", detail: "ACK legal auditado", icon: CheckCircle2, state: "done" },
+  { title: "Despacho movil", detail: "M-12 en ruta 04m", icon: Route, state: "active" },
+  { title: "Cierre y evidencia", detail: "Hash inmutable", icon: LockKeyhole, state: "pending" }
+];
+
+const pilotModules = [
+  "VisionAI con 25 camaras",
+  "Centro de Comando web",
+  "Auditoria Ley 25.326",
+  "Reporte ejecutivo mensual",
+  "Soporte local Nativos"
+];
+
 export default function Page() {
   const [events, setEvents] = useState(fallbackEvents);
   const [cameras, setCameras] = useState(fallbackCameras);
   const [eventSummary, setEventSummary] = useState<EventSummary | null>(null);
   const [cameraOverview, setCameraOverview] = useState<CameraOverview | null>(null);
   const [sessionState, setSessionState] = useState("Modo visual");
+  const [selectedTenant, setSelectedTenant] = useState(demoTenants[0]);
+  const [demoRunning, setDemoRunning] = useState(false);
 
   useEffect(() => {
     const token = window.localStorage.getItem("guardian360.accessToken");
@@ -178,6 +226,22 @@ export default function Page() {
     ];
   }, [cameraOverview, eventSummary]);
 
+  const startDemoSimulation = () => {
+    setDemoRunning(true);
+    setSessionState("Simulacion comercial activa");
+    setEvents((currentEvents) => [
+      {
+        type: "Boton de panico",
+        zone: "Plaza 25 de Mayo",
+        source: "CiudadanoApp",
+        severity: "Critico",
+        time: "Ahora",
+        icon: Siren
+      },
+      ...currentEvents.slice(0, 5)
+    ]);
+  };
+
   return (
     <main className="command-shell">
       <aside className="sidebar" aria-label="Navegacion principal">
@@ -210,12 +274,96 @@ export default function Page() {
             <p className="eyebrow">Ministerio de Seguridad de Catamarca</p>
             <h1>Centro de Comando</h1>
           </div>
-          <div className="operator-strip">
-            <span className="live-dot" />
-            <strong>Operativo en vivo</strong>
-            <span>{sessionState}</span>
+          <div className="topbar-actions">
+            <label className="tenant-selector">
+              <Building2 size={16} aria-hidden />
+              <select
+                value={selectedTenant}
+                onChange={(event) => setSelectedTenant(event.target.value)}
+              >
+                {demoTenants.map((tenant) => (
+                  <option key={tenant}>{tenant}</option>
+                ))}
+              </select>
+            </label>
+            <button className="primary-action" type="button" onClick={startDemoSimulation}>
+              <PlayCircle size={18} aria-hidden />
+              {demoRunning ? "Simulacion activa" : "Iniciar simulacion"}
+            </button>
+            <div className="operator-strip">
+              <span className="live-dot" />
+              <strong>Operativo en vivo</strong>
+              <span>{sessionState}</span>
+            </div>
           </div>
         </header>
+
+        <section className="commercial-grid" aria-label="Demo comercial ejecutiva">
+          <article className="executive-panel">
+            <div className="panel-title compact">
+              <div>
+                <p className="eyebrow">Decision ejecutiva</p>
+                <h2>Impacto para {selectedTenant}</h2>
+              </div>
+              <BarChart3 size={20} aria-hidden />
+            </div>
+            <div className="executive-metrics">
+              {executiveMetrics.map((metric) => (
+                <div key={metric.label}>
+                  <span>{metric.label}</span>
+                  <strong>{metric.value}</strong>
+                  <small>{metric.detail}</small>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="flow-panel">
+            <div className="panel-title compact">
+              <div>
+                <p className="eyebrow">Caso demo</p>
+                <h2>Evento resuelto punta a punta</h2>
+              </div>
+              <Siren size={20} aria-hidden />
+            </div>
+            <div className="flow-steps">
+              {eventFlow.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <div className={`flow-step ${step.state}`} key={step.title}>
+                    <span>
+                      <Icon size={17} aria-hidden />
+                    </span>
+                    <div>
+                      <strong>{step.title}</strong>
+                      <small>{step.detail}</small>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+
+          <article className="pilot-panel">
+            <div className="panel-title compact">
+              <div>
+                <p className="eyebrow">Piloto 90 dias</p>
+                <h2>Paquete vendible</h2>
+              </div>
+              <button className="icon-button" type="button" aria-label="Imprimir reporte" onClick={() => window.print()}>
+                <Download size={18} aria-hidden />
+              </button>
+            </div>
+            <ul className="pilot-list">
+              {pilotModules.map((module) => (
+                <li key={module}>
+                  <CheckCircle2 size={16} aria-hidden />
+                  {module}
+                </li>
+              ))}
+            </ul>
+          </article>
+        </section>
 
         <section className="kpi-grid" aria-label="Indicadores">
           {kpis.map((kpi) => (
@@ -351,6 +499,36 @@ export default function Page() {
                 Movil asignado esperando ACK
               </li>
             </ol>
+          </article>
+        </section>
+
+        <section className="sales-grid" aria-label="Argumentos de contratacion">
+          <article className="sales-card legal">
+            <Gavel size={21} aria-hidden />
+            <div>
+              <h2>Trazabilidad legal nativa</h2>
+              <p>
+                Cada accion sensible queda con usuario, tenant, timestamp y hash encadenado para auditoria.
+              </p>
+            </div>
+          </article>
+          <article className="sales-card">
+            <FileText size={21} aria-hidden />
+            <div>
+              <h2>Reporte para licitacion</h2>
+              <p>
+                Arquitectura, soberania de datos, alcance piloto, modulos y cumplimiento documentados.
+              </p>
+            </div>
+          </article>
+          <article className="sales-card">
+            <Shield size={21} aria-hidden />
+            <div>
+              <h2>Implementacion local</h2>
+              <p>
+                Producto de Nativos, soporte en Catamarca y despliegue preparado para infraestructura soberana.
+              </p>
+            </div>
           </article>
         </section>
       </section>
