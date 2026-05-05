@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "dev:3002": "next dev -H 0.0.0.0 -p 3002",
+    "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "eslint .",
     "test": "echo \"Tests del dashboard se agregan con las primeras pantallas\"",
     "typecheck": "tsc -p tsconfig.json --noEmit"

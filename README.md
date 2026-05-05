@@ -37,6 +37,7 @@ Servicios esperados:
 - Dashboard web: `http://localhost:3000`
 - API NestJS: `http://localhost:3001`
 - Swagger/OpenAPI: `http://localhost:3001/docs`
+- Login operativo: `http://localhost:3000/login`
 - Grafana: `http://localhost:3030`
 - MinIO Console: `http://localhost:9001`
 
@@ -49,6 +50,7 @@ Servicios esperados:
 - `pnpm typecheck`: valida TypeScript en modo estricto.
 - `pnpm test`: corre tests unitarios.
 - `pnpm prod:check`: lint, typecheck, test y build.
+- `pnpm --filter @guardian360/backend-nestjs exec prisma migrate deploy`: aplica migraciones versionadas.
 
 ## Principios de arquitectura
 

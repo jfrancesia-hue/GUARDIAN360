@@ -106,6 +106,65 @@ async function main(): Promise<void> {
       ON CONFLICT ("tenantId", "externalId") DO NOTHING
     `;
   }
+
+  const demoCameras = await prisma.camera.findMany({
+    where: {
+      tenantId: tenant.id,
+      deletedAt: null
+    },
+    take: 3,
+    orderBy: {
+      externalId: "asc"
+    },
+    select: {
+      id: true
+    }
+  });
+
+  const eventSeeds = [
+    {
+      cameraId: demoCameras[0]?.id ?? null,
+      type: "WEAPON",
+      severity: "CRITICAL",
+      confidence: 0.91,
+      longitude: -65.785,
+      latitude: -28.469,
+      metadata: { source: "vision-ai", model: "yolov10-demo" }
+    },
+    {
+      cameraId: demoCameras[1]?.id ?? null,
+      type: "LICENSE_PLATE",
+      severity: "HIGH",
+      confidence: 0.87,
+      longitude: -65.774,
+      latitude: -28.461,
+      metadata: { plate: "AE789EF", source: "lpr-demo" }
+    },
+    {
+      cameraId: demoCameras[2]?.id ?? null,
+      type: "FIRE_HOTSPOT",
+      severity: "MEDIUM",
+      confidence: 0.78,
+      longitude: -65.7,
+      latitude: -28.36,
+      metadata: { source: "satellite-patrol", satellite: "sentinel-2" }
+    }
+  ] as const;
+
+  for (const event of eventSeeds) {
+    await prisma.$executeRaw`
+      INSERT INTO "Event" (
+        "id", "tenantId", "cameraId", "type", "severity", "status", "confidence",
+        "location", "metadata", "occurredAt", "detectedAt", "createdAt", "updatedAt"
+      )
+      VALUES (
+        gen_random_uuid(), ${tenant.id}, ${event.cameraId}, ${event.type}::"EventType",
+        ${event.severity}::"Severity", 'NEW'::"EventStatus", ${event.confidence},
+        ST_SetSRID(ST_MakePoint(${event.longitude}, ${event.latitude}), 4326),
+        ${event.metadata}, now(), now(), now(), now()
+      )
+    `;
+  }
 }
 
 main()

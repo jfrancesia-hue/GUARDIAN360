@@ -72,7 +72,8 @@ services:
 
   backend-nestjs:
     build:
-      context: ./apps/backend-nestjs
+      context: .
+      dockerfile: apps/backend-nestjs/Dockerfile
       target: development
     depends_on:
       - postgres
@@ -86,13 +87,17 @@ services:
       MINIO_PORT: 9000
       MQTT_BROKER: mqtt://mosquitto:1883
       JWT_SECRET: ${JWT_SECRET:-change_me_min_32_chars_local_dev}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_refresh_min_32_chars_local_dev}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       NODE_ENV: development
       API_PORT: 3001
     ports:
       - "3001:3001"
     volumes:
-      - ./apps/backend-nestjs:/app
-      - /app/node_modules
+      - ./apps/backend-nestjs:/repo/apps/backend-nestjs
+      - /repo/node_modules
+      - /repo/apps/backend-nestjs/node_modules
 
   backend-laravel:
     build:
@@ -150,7 +155,8 @@ services:
 
   dashboard-web:
     build:
-      context: ./apps/dashboard-web
+      context: .
+      dockerfile: apps/dashboard-web/Dockerfile
       target: development
     depends_on:
       - backend-nestjs
@@ -161,9 +167,10 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./apps/dashboard-web:/app
-      - /app/node_modules
-      - /app/.next
+      - ./apps/dashboard-web:/repo/apps/dashboard-web
+      - /repo/node_modules
+      - /repo/apps/dashboard-web/node_modules
+      - /repo/apps/dashboard-web/.next
 
 volumes:
   pg_data:

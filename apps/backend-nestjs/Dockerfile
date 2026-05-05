@@ -1,27 +1,28 @@
 FROM node:20.11-alpine AS base
-WORKDIR /app
+WORKDIR /repo
 RUN corepack enable
 
 FROM base AS development
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --ignore-scripts || true
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY packages ./packages
+COPY apps/backend-nestjs ./apps/backend-nestjs
+RUN pnpm install --filter @guardian360/backend-nestjs... --frozen-lockfile
+WORKDIR /repo/apps/backend-nestjs
 EXPOSE 3001
 CMD ["pnpm", "dev"]
 
 FROM base AS build
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY packages ./packages
+COPY apps/backend-nestjs ./apps/backend-nestjs
+RUN pnpm install --filter @guardian360/backend-nestjs... --frozen-lockfile
+WORKDIR /repo/apps/backend-nestjs
 RUN pnpm prisma:generate && pnpm build
 
 FROM node:20.11-alpine AS production
-WORKDIR /app
+WORKDIR /repo
 ENV NODE_ENV=production
 RUN corepack enable
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
+COPY --from=build /repo ./
 EXPOSE 3001
-CMD ["node", "dist/src/main.js"]
+CMD ["pnpm", "--filter", "@guardian360/backend-nestjs", "start"]

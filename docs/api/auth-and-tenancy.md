@@ -12,6 +12,13 @@ Sprint 1.2 agrega la primera capa operativa de seguridad para Guardian360.
 - `POST /users`: crea usuario dentro del tenant actual. Requiere `SUPER_ADMIN` o `TENANT_ADMIN`.
 - `GET /tenants/current`: devuelve datos del tenant actual.
 - `GET /audit/recent`: muestra auditoria reciente del tenant. Requiere rol admin.
+- `GET /cameras`: lista camaras del tenant autenticado.
+- `POST /cameras`: registra camara con ubicacion PostGIS. Requiere rol admin.
+- `PATCH /cameras/:id/status`: cambia estado de camara. Requiere rol admin u operador.
+- `GET /events`: lista eventos recientes del tenant.
+- `POST /events`: crea evento operativo. Requiere rol admin u operador.
+- `PATCH /events/:id/ack`: confirma recepcion del evento y audita el ACK.
+- `PATCH /events/:id/status`: cambia el estado operativo del evento.
 
 ## Decisiones
 
@@ -19,6 +26,7 @@ Sprint 1.2 agrega la primera capa operativa de seguridad para Guardian360.
 - Los guards globales fuerzan autenticacion, tenant y roles salvo rutas `@Public`.
 - Los servicios operativos usan `tenantId` desde el usuario autenticado.
 - Cada login, logout y alta de usuario registra `AuditLog` con hash encadenado.
+- Cada alta o actualizacion sensible de camaras y eventos registra `AuditLog`.
 - Los refresh tokens se guardan hasheados con bcrypt y rotan en cada uso.
 
 ## Pendiente para endurecimiento final
