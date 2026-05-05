@@ -826,6 +826,49 @@ h2 {
   }
 }
 
+@keyframes heroDrift {
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: scale(1.08) translate3d(-18px, -10px, 0);
+  }
+}
+
+@keyframes heroScan {
+  from {
+    background-position: -48% 0, center;
+  }
+
+  to {
+    background-position: 148% 0, center;
+  }
+}
+
+@keyframes mapGridShift {
+  from {
+    background-position: 0 0, 0 0, center;
+  }
+
+  to {
+    background-position: 68px 68px, 68px 68px, center;
+  }
+}
+
+@keyframes mapRadar {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.78);
+  }
+
+  50% {
+    opacity: 0.66;
+    transform: scale(1.08);
+  }
+}
+
 .commercial-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr) minmax(300px, 0.82fr);
@@ -1560,6 +1603,7 @@ h2 {
   height: 100%;
   object-fit: cover;
   filter: saturate(1.08) contrast(1.03);
+  animation: heroDrift 18s ease-in-out infinite alternate;
 }
 
 .public-hero::after {
@@ -1571,9 +1615,111 @@ h2 {
     linear-gradient(0deg, rgba(16, 19, 18, 0.96), transparent 58%);
 }
 
+.public-hero-scan {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(54, 215, 239, 0.1), transparent),
+    linear-gradient(rgba(54, 215, 239, 0.08) 1px, transparent 1px);
+  background-size: 36% 100%, 100% 52px;
+  background-position: -48% 0, center;
+  mix-blend-mode: screen;
+  opacity: 0.62;
+  animation: heroScan 6s linear infinite;
+  pointer-events: none;
+}
+
+.public-hero-orbit {
+  position: absolute;
+  z-index: 2;
+  right: clamp(20px, 6vw, 88px);
+  top: 50%;
+  width: min(430px, 34vw);
+  aspect-ratio: 1;
+  transform: translateY(-50%) rotateX(58deg) rotateZ(-14deg);
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.public-orbit-ring {
+  position: absolute;
+  inset: 6%;
+  border: 1px solid rgba(54, 215, 239, 0.42);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(54, 215, 239, 0.14), transparent 52%),
+    conic-gradient(from 90deg, transparent, rgba(54, 215, 239, 0.7), rgba(18, 201, 155, 0.36), transparent);
+  box-shadow:
+    0 0 70px rgba(54, 215, 239, 0.2),
+    inset 0 0 42px rgba(18, 201, 155, 0.12);
+  animation: orbitSpin 15s linear infinite;
+}
+
+.public-orbit-ring::before,
+.public-orbit-ring::after {
+  content: "";
+  position: absolute;
+  border: 1px dashed rgba(240, 245, 242, 0.22);
+  border-radius: 50%;
+}
+
+.public-orbit-ring::before {
+  inset: 18%;
+}
+
+.public-orbit-ring::after {
+  inset: 36%;
+}
+
+.public-orbit-node {
+  position: absolute;
+  min-width: 108px;
+  min-height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(240, 245, 242, 0.18);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.76);
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+  transform: rotateZ(14deg) rotateX(-58deg) translateZ(40px);
+  animation: floatNode 4.2s ease-in-out infinite;
+}
+
+.node-command {
+  left: 4%;
+  top: 42%;
+}
+
+.node-ai {
+  right: 0;
+  top: 28%;
+  color: var(--green);
+  animation-delay: -1s;
+}
+
+.node-sat {
+  left: 36%;
+  top: 0;
+  color: var(--amber);
+  animation-delay: -2s;
+}
+
+.node-evidence {
+  left: 34%;
+  bottom: 2%;
+  color: var(--violet);
+  animation-delay: -3s;
+}
+
 .public-hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   width: min(860px, 100%);
   display: grid;
   gap: 18px;
@@ -1595,6 +1741,31 @@ h2 {
 .public-actions {
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.public-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.public-status-strip span {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(240, 245, 242, 0.16);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.68);
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
+}
+
+.public-status-strip svg {
+  color: var(--cyan);
 }
 
 .primary-link,
@@ -1668,16 +1839,86 @@ h2 {
   min-height: 220px;
   display: grid;
   align-content: space-between;
+  gap: 20px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background:
     linear-gradient(135deg, rgba(54, 215, 239, 0.1), transparent 50%),
     rgba(23, 28, 27, 0.92);
   padding: 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.public-module::before {
+  content: "";
+  position: absolute;
+  inset: -40% auto auto -20%;
+  width: 180px;
+  aspect-ratio: 1;
+  border: 1px solid rgba(54, 215, 239, 0.16);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(54, 215, 239, 0.12), transparent 64%);
+  transition: transform 360ms ease, opacity 220ms ease;
+}
+
+.public-module:hover {
+  border-color: rgba(54, 215, 239, 0.54);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.22);
+  transform: translateY(-4px);
+}
+
+.public-module:hover::before {
+  opacity: 0.95;
+  transform: translate(28px, 24px) scale(1.08);
+}
+
+.public-module-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(54, 215, 239, 0.22);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.68);
+  color: var(--cyan);
+  position: relative;
+  z-index: 1;
+  animation: unitFloat 4.8s ease-in-out infinite;
+}
+
+.public-module:nth-child(2) .public-module-icon {
+  color: var(--green);
+  animation-delay: -1.2s;
+}
+
+.public-module:nth-child(3) .public-module-icon {
+  color: var(--amber);
+  animation-delay: -2.4s;
+}
+
+.public-module:nth-child(4) .public-module-icon {
+  color: var(--violet);
+  animation-delay: -3.6s;
+}
+
+.public-module:hover .public-module-icon svg {
+  filter: drop-shadow(0 0 10px currentColor);
+  transform: scale(1.12) rotate(-5deg);
+}
+
+.public-module > div {
+  position: relative;
+  z-index: 1;
 }
 
 .public-module svg {
   color: var(--cyan);
+}
+
+.public-module-icon svg {
+  color: currentColor;
 }
 
 .public-module h3,
@@ -1713,6 +1954,7 @@ h2 {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
 }
 
 .public-map-visual img {
@@ -1720,6 +1962,8 @@ h2 {
   height: 100%;
   object-fit: cover;
   filter: saturate(1.08) contrast(1.04);
+  transform: scale(1.02);
+  animation: heroDrift 22s ease-in-out infinite alternate;
 }
 
 .public-map-visual::after {
@@ -1731,6 +1975,19 @@ h2 {
     linear-gradient(rgba(54, 215, 239, 0.1) 1px, transparent 1px),
     linear-gradient(0deg, rgba(16, 19, 18, 0.74), rgba(16, 19, 18, 0.1));
   background-size: 68px 68px, 68px 68px, auto;
+  animation: mapGridShift 11s linear infinite;
+}
+
+.public-map-visual::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 12%;
+  border: 1px solid rgba(54, 215, 239, 0.28);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(54, 215, 239, 0.1), transparent 58%);
+  animation: mapRadar 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .public-pin {
@@ -1797,6 +2054,13 @@ h2 {
   border-radius: 8px;
   background: rgba(23, 28, 27, 0.92);
   padding: 14px;
+  transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+}
+
+.public-flow-list article:hover {
+  border-color: rgba(18, 201, 155, 0.42);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.2);
+  transform: translateX(4px);
 }
 
 .public-flow-list span {
@@ -1807,6 +2071,19 @@ h2 {
   border-radius: 8px;
   background: rgba(18, 201, 155, 0.12);
   color: var(--green);
+  animation: livePulse 2.4s ease-in-out infinite;
+}
+
+.public-flow-list article:nth-child(2) span {
+  animation-delay: -0.6s;
+}
+
+.public-flow-list article:nth-child(3) span {
+  animation-delay: -1.2s;
+}
+
+.public-flow-list article:nth-child(4) span {
+  animation-delay: -1.8s;
 }
 
 .public-app-grid {
@@ -1821,6 +2098,7 @@ h2 {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
+  transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
 }
 
 .public-app img {
@@ -1829,6 +2107,8 @@ h2 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 600ms ease, filter 600ms ease;
 }
 
 .public-app::after {
@@ -1850,6 +2130,22 @@ h2 {
 
 .public-app svg {
   color: var(--green);
+}
+
+.public-app:hover {
+  border-color: rgba(18, 201, 155, 0.45);
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.24);
+  transform: translateY(-4px);
+}
+
+.public-app:hover img {
+  filter: saturate(1.12) contrast(1.08);
+  transform: scale(1.07);
+}
+
+.public-app:hover svg {
+  filter: drop-shadow(0 0 10px rgba(18, 201, 155, 0.55));
+  transform: translateY(-2px) scale(1.1);
 }
 
 .public-architecture {
@@ -1879,6 +2175,18 @@ h2 {
   color: var(--text);
   padding: 0 14px;
   font-weight: 850;
+  transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+}
+
+.architecture-lane span:hover {
+  border-color: rgba(54, 215, 239, 0.46);
+  box-shadow: 0 16px 36px rgba(54, 215, 239, 0.1);
+  transform: translateY(-3px);
+}
+
+.architecture-lane span:hover svg {
+  color: var(--cyan);
+  filter: drop-shadow(0 0 8px rgba(54, 215, 239, 0.45));
 }
 
 .login-shell {
@@ -2109,6 +2417,20 @@ h2 {
     padding: 24px 16px;
   }
 
+  .public-hero-orbit {
+    top: 31%;
+    right: 50%;
+    width: min(310px, 76vw);
+    opacity: 0.72;
+    transform: translate(50%, -50%) rotateX(58deg) rotateZ(-14deg);
+  }
+
+  .public-orbit-node {
+    min-width: 92px;
+    min-height: 50px;
+    font-size: 11px;
+  }
+
   .public-hero-content h1 {
     font-size: 42px;
   }
@@ -2214,7 +2536,16 @@ h2 {
   .camera-pin,
   .event-pin,
   .patrol-unit,
-  .public-pin {
+  .public-pin,
+  .public-hero img,
+  .public-hero-scan,
+  .public-orbit-ring,
+  .public-orbit-node,
+  .public-module-icon,
+  .public-map-visual img,
+  .public-map-visual::after,
+  .public-map-visual::before,
+  .public-flow-list span {
     animation: none;
   }
 
@@ -2241,7 +2572,11 @@ h2 {
   .public-nav nav a:hover,
   .camera-pin:hover,
   .event-pin:hover,
-  .patrol-unit:hover {
+  .patrol-unit:hover,
+  .public-module:hover,
+  .public-flow-list article:hover,
+  .public-app:hover,
+  .architecture-lane span:hover {
     transform: none;
   }
 }

@@ -82,6 +82,26 @@ export default function HomePage() {
           src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=2100&q=86"
           alt="Puesto de monitoreo con pantallas operativas"
         />
+        <div className="public-hero-orbit" aria-hidden="true">
+          <span className="public-orbit-ring" />
+          <span className="public-orbit-node node-command">
+            <Radio size={18} />
+            Comando
+          </span>
+          <span className="public-orbit-node node-ai">
+            <Camera size={18} />
+            VisionAI
+          </span>
+          <span className="public-orbit-node node-sat">
+            <Satellite size={18} />
+            Satelite
+          </span>
+          <span className="public-orbit-node node-evidence">
+            <LockKeyhole size={18} />
+            Custodia
+          </span>
+        </div>
+        <div className="public-hero-scan" aria-hidden="true" />
         <div className="public-hero-content">
           <p className="eyebrow">Seguridad ciudadana e inteligencia urbana</p>
           <h1>Una vista ilustrativa de como opera Guardian360 en territorio</h1>
@@ -92,6 +112,11 @@ export default function HomePage() {
           <div className="public-actions">
             <Link className="primary-link" href="/dashboard">Abrir centro operativo</Link>
             <Link className="secondary-link" href="/login">Acceso institucional</Link>
+          </div>
+          <div className="public-status-strip" aria-label="Estado visual de plataforma">
+            <span><CircleAlert size={16} aria-hidden /> 18 eventos</span>
+            <span><Video size={16} aria-hidden /> 142 camaras</span>
+            <span><Route size={16} aria-hidden /> 04m ETA</span>
           </div>
         </div>
       </section>
@@ -106,9 +131,13 @@ export default function HomePage() {
             const Icon = module.icon;
             return (
               <article className="public-module" key={module.title}>
-                <Icon size={24} aria-hidden />
-                <h3>{module.title}</h3>
-                <p>{module.detail}</p>
+                <span className="public-module-icon">
+                  <Icon size={24} aria-hidden />
+                </span>
+                <div>
+                  <h3>{module.title}</h3>
+                  <p>{module.detail}</p>
+                </div>
               </article>
             );
           })}
