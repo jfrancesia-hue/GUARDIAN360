@@ -6,6 +6,21 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
     },
+    "@guardian360/api-contracts#build": {
+      "outputs": []
+    },
+    "@guardian360/i18n-strings#build": {
+      "outputs": []
+    },
+    "@guardian360/mobile-citizen#build": {
+      "outputs": []
+    },
+    "@guardian360/mobile-officer#build": {
+      "outputs": []
+    },
+    "@guardian360/shared-ui#build": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
