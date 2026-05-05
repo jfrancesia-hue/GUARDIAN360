@@ -60,12 +60,25 @@ interface CameraOverview {
 }
 
 interface DashboardEvent {
+  id: string;
   type: string;
   zone: string;
   source: string;
   severity: string;
   time: string;
   icon: LucideIcon;
+}
+
+interface ExecutiveMetric {
+  label: string;
+  value: string;
+  detail: string;
+}
+
+interface TenantProfile {
+  name: string;
+  metrics: ExecutiveMetric[];
+  pilotScope: string[];
 }
 
 const fallbackKpis = [
@@ -77,14 +90,16 @@ const fallbackKpis = [
 
 const fallbackEvents: DashboardEvent[] = [
   {
+    id: "fallback-weapon",
     type: "Arma detectada",
-    zone: "Av. Güemes y Vicario Segura",
+    zone: "Av. Guemes y Vicario Segura",
     source: "Camara COM-014",
     severity: "Critico",
     time: "Hace 42s",
     icon: Siren
   },
   {
+    id: "fallback-license-plate",
     type: "Patente con pedido",
     zone: "Ruta 38 - Acceso Sur",
     source: "LPR COM-088",
@@ -93,6 +108,7 @@ const fallbackEvents: DashboardEvent[] = [
     icon: Camera
   },
   {
+    id: "fallback-fire",
     type: "Foco de calor",
     zone: "Sierra de Ancasti",
     source: "SatellitePatrol",
@@ -116,19 +132,85 @@ const fallbackCameras = [
   { name: "COM-102", zone: "Terminal", status: "IA activa", health: 99 }
 ];
 
+const defaultTenant = "Catamarca Provincia";
+
 const demoTenants = [
-  "Catamarca Provincia",
+  defaultTenant,
   "Municipalidad SFVC",
   "Valle Viejo",
   "Salta Demo"
+] as const;
+
+type DemoTenant = (typeof demoTenants)[number];
+
+const defaultPilotScope = [
+  "VisionAI con 25 camaras",
+  "Centro de Comando web",
+  "Auditoria Ley 25.326",
+  "Reporte ejecutivo mensual",
+  "Soporte local Nativos"
 ];
 
-const executiveMetrics = [
-  { label: "Respuesta promedio", value: "04:18", detail: "36% mas rapido" },
-  { label: "Cobertura urbana", value: "91%", detail: "142 camaras activas" },
-  { label: "Incidentes resueltos", value: "64", detail: "ultimas 24 horas" },
-  { label: "Ahorro estimado", value: "58%", detail: "vs suite importada" }
-];
+const tenantProfiles: Record<DemoTenant, TenantProfile> = {
+  "Catamarca Provincia": {
+    name: "Catamarca Provincia",
+    metrics: [
+      { label: "Respuesta promedio", value: "04:18", detail: "36% mas rapido" },
+      { label: "Cobertura urbana", value: "91%", detail: "142 camaras activas" },
+      { label: "Incidentes resueltos", value: "64", detail: "ultimas 24 horas" },
+      { label: "Ahorro estimado", value: "58%", detail: "vs suite importada" }
+    ],
+    pilotScope: defaultPilotScope
+  },
+  "Municipalidad SFVC": {
+    name: "Municipalidad SFVC",
+    metrics: [
+      { label: "Respuesta promedio", value: "03:52", detail: "alerta a despacho" },
+      { label: "Cobertura urbana", value: "86%", detail: "zonas criticas" },
+      { label: "Incidentes resueltos", value: "41", detail: "ultimas 24 horas" },
+      { label: "Ahorro estimado", value: "52%", detail: "sin licencias externas" }
+    ],
+    pilotScope: [
+      "VisionAI sobre anillo centrico",
+      "Mapa tactico municipal",
+      "Despacho de moviles",
+      "Auditoria por usuario",
+      "Reporte semanal al ejecutivo"
+    ]
+  },
+  "Valle Viejo": {
+    name: "Valle Viejo",
+    metrics: [
+      { label: "Respuesta promedio", value: "05:06", detail: "rutas y barrios" },
+      { label: "Cobertura urbana", value: "74%", detail: "35 camaras activas" },
+      { label: "Incidentes resueltos", value: "22", detail: "ultimas 24 horas" },
+      { label: "Ahorro estimado", value: "61%", detail: "infraestructura local" }
+    ],
+    pilotScope: [
+      "Lectura de patentes",
+      "Corredores escolares",
+      "Boton de panico ciudadano",
+      "Mesa de evidencias",
+      "Soporte local Nativos"
+    ]
+  },
+  "Salta Demo": {
+    name: "Salta Demo",
+    metrics: [
+      { label: "Respuesta promedio", value: "04:44", detail: "multi jurisdiccion" },
+      { label: "Cobertura urbana", value: "88%", detail: "capital y accesos" },
+      { label: "Incidentes resueltos", value: "57", detail: "ultimas 24 horas" },
+      { label: "Ahorro estimado", value: "55%", detail: "vs suite importada" }
+    ],
+    pilotScope: [
+      "Monitoreo multi tenant",
+      "Camara + satelite",
+      "Despacho por prioridad",
+      "Evidencia con hash",
+      "Tablero ejecutivo"
+    ]
+  }
+};
 
 const eventFlow = [
   { title: "IA detecta", detail: "Arma en via publica", icon: Siren, state: "done" },
@@ -137,13 +219,15 @@ const eventFlow = [
   { title: "Cierre y evidencia", detail: "Hash inmutable", icon: LockKeyhole, state: "pending" }
 ];
 
-const pilotModules = [
-  "VisionAI con 25 camaras",
-  "Centro de Comando web",
-  "Auditoria Ley 25.326",
-  "Reporte ejecutivo mensual",
-  "Soporte local Nativos"
-];
+const demoPanicEvent: DashboardEvent = {
+  id: "demo-panic-button",
+  type: "Boton de panico",
+  zone: "Plaza 25 de Mayo",
+  source: "CiudadanoApp",
+  severity: "Critico",
+  time: "Ahora",
+  icon: Siren
+};
 
 export default function Page() {
   const [events, setEvents] = useState(fallbackEvents);
@@ -151,8 +235,10 @@ export default function Page() {
   const [eventSummary, setEventSummary] = useState<EventSummary | null>(null);
   const [cameraOverview, setCameraOverview] = useState<CameraOverview | null>(null);
   const [sessionState, setSessionState] = useState("Modo visual");
-  const [selectedTenant, setSelectedTenant] = useState(demoTenants[0]);
+  const [selectedTenant, setSelectedTenant] = useState<DemoTenant>(defaultTenant);
   const [demoRunning, setDemoRunning] = useState(false);
+  const selectedTenantProfile: TenantProfile =
+    tenantProfiles[selectedTenant] ?? tenantProfiles[defaultTenant];
 
   useEffect(() => {
     const token = window.localStorage.getItem("guardian360.accessToken");
@@ -230,15 +316,8 @@ export default function Page() {
     setDemoRunning(true);
     setSessionState("Simulacion comercial activa");
     setEvents((currentEvents) => [
-      {
-        type: "Boton de panico",
-        zone: "Plaza 25 de Mayo",
-        source: "CiudadanoApp",
-        severity: "Critico",
-        time: "Ahora",
-        icon: Siren
-      },
-      ...currentEvents.slice(0, 5)
+      demoPanicEvent,
+      ...currentEvents.filter((event) => event.id !== demoPanicEvent.id).slice(0, 5)
     ]);
   };
 
@@ -279,7 +358,7 @@ export default function Page() {
               <Building2 size={16} aria-hidden />
               <select
                 value={selectedTenant}
-                onChange={(event) => setSelectedTenant(event.target.value)}
+                onChange={(event) => setSelectedTenant(event.target.value as DemoTenant)}
               >
                 {demoTenants.map((tenant) => (
                   <option key={tenant}>{tenant}</option>
@@ -308,7 +387,7 @@ export default function Page() {
               <BarChart3 size={20} aria-hidden />
             </div>
             <div className="executive-metrics">
-              {executiveMetrics.map((metric) => (
+              {selectedTenantProfile.metrics.map((metric) => (
                 <div key={metric.label}>
                   <span>{metric.label}</span>
                   <strong>{metric.value}</strong>
@@ -355,7 +434,7 @@ export default function Page() {
               </button>
             </div>
             <ul className="pilot-list">
-              {pilotModules.map((module) => (
+              {selectedTenantProfile.pilotScope.map((module) => (
                 <li key={module}>
                   <CheckCircle2 size={16} aria-hidden />
                   {module}
@@ -424,7 +503,7 @@ export default function Page() {
               {events.map((event) => {
                 const Icon = event.icon;
                 return (
-                  <article className="event-row" key={`${event.type}-${event.zone}`}>
+                  <article className="event-row" key={event.id}>
                     <div className="event-icon">
                       <Icon size={18} aria-hidden />
                     </div>
@@ -539,6 +618,7 @@ export default function Page() {
 function toEventRow(event: ApiEvent) {
   const type = formatEventType(event.type);
   return {
+    id: event.id,
     type,
     zone: event.cameraName ?? "Sin camara asignada",
     source: event.status,
