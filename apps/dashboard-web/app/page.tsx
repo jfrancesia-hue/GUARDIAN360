@@ -81,6 +81,15 @@ interface TenantProfile {
   pilotScope: string[];
 }
 
+interface VisualScene {
+  title: string;
+  label: string;
+  detail: string;
+  image: string;
+  alt: string;
+  icon: LucideIcon;
+}
+
 const fallbackKpis = [
   { label: "Eventos activos", value: "18", trend: "+4", state: "critical" },
   { label: "Camaras online", value: "142", trend: "96%", state: "ok" },
@@ -229,6 +238,33 @@ const demoPanicEvent: DashboardEvent = {
   icon: Siren
 };
 
+const visualScenes: VisualScene[] = [
+  {
+    title: "Comando integrado",
+    label: "Centro operativo",
+    detail: "Monitoreo, IA y despacho en una sola vista",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+    alt: "Sala tecnologica con servidores y luces de monitoreo",
+    icon: Radio
+  },
+  {
+    title: "Camara urbana",
+    label: "VisionAI",
+    detail: "Deteccion priorizada para operadores",
+    image: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=80",
+    alt: "Ciudad iluminada de noche vista desde altura",
+    icon: Camera
+  },
+  {
+    title: "Cobertura satelital",
+    label: "SatellitePatrol",
+    detail: "Focos de calor y zonas rurales",
+    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
+    alt: "Vista de la Tierra desde el espacio",
+    icon: Satellite
+  }
+];
+
 export default function Page() {
   const [events, setEvents] = useState(fallbackEvents);
   const [cameras, setCameras] = useState(fallbackCameras);
@@ -376,6 +412,52 @@ export default function Page() {
             </div>
           </div>
         </header>
+
+        <section className="visual-command" aria-label="Vista visual del sistema">
+          <article className="hero-visual">
+            <img
+              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=82"
+              alt="Operador trabajando con pantallas de monitoreo"
+            />
+            <div className="hero-visual-overlay">
+              <p className="eyebrow">Demo visual vendible</p>
+              <h2>Guardián360 muestra el operativo, no solo los datos</h2>
+              <div className="hero-signal-grid">
+                <span>
+                  <strong>18</strong>
+                  eventos activos
+                </span>
+                <span>
+                  <strong>142</strong>
+                  camaras conectadas
+                </span>
+                <span>
+                  <strong>04m</strong>
+                  movil en ruta
+                </span>
+              </div>
+            </div>
+          </article>
+
+          <div className="scene-strip">
+            {visualScenes.map((scene) => {
+              const Icon = scene.icon;
+              return (
+                <article className="scene-card" key={scene.title}>
+                  <img src={scene.image} alt={scene.alt} />
+                  <div>
+                    <span>
+                      <Icon size={16} aria-hidden />
+                      {scene.label}
+                    </span>
+                    <strong>{scene.title}</strong>
+                    <small>{scene.detail}</small>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
 
         <section className="commercial-grid" aria-label="Demo comercial ejecutiva">
           <article className="executive-panel">

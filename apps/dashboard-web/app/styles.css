@@ -33,6 +33,11 @@ select {
   font: inherit;
 }
 
+img {
+  display: block;
+  max-width: 100%;
+}
+
 .command-shell {
   min-height: 100vh;
   display: grid;
@@ -213,6 +218,143 @@ h2 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 14px;
+}
+
+.visual-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.hero-visual,
+.scene-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.hero-visual {
+  min-height: 342px;
+}
+
+.hero-visual img,
+.scene-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-visual img {
+  position: absolute;
+  inset: 0;
+  filter: saturate(1.08) contrast(1.03);
+}
+
+.hero-visual::after,
+.scene-card::after,
+.city-map::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero-visual::after {
+  background:
+    linear-gradient(90deg, rgba(16, 19, 18, 0.94), rgba(16, 19, 18, 0.42) 54%, rgba(16, 19, 18, 0.16)),
+    linear-gradient(0deg, rgba(16, 19, 18, 0.9), transparent 54%);
+}
+
+.hero-visual-overlay {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  min-height: 342px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 28px;
+}
+
+.hero-visual-overlay h2 {
+  font-size: clamp(28px, 4.4vw, 52px);
+  line-height: 1;
+}
+
+.hero-signal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hero-signal-grid span {
+  min-height: 78px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid rgba(240, 245, 242, 0.18);
+  border-radius: 8px;
+  background: rgba(16, 19, 18, 0.72);
+  color: var(--muted);
+  padding: 12px;
+}
+
+.hero-signal-grid strong {
+  color: var(--text);
+  font-size: 25px;
+  line-height: 1;
+}
+
+.scene-strip {
+  display: grid;
+  gap: 14px;
+}
+
+.scene-card {
+  min-height: 104px;
+}
+
+.scene-card img {
+  position: absolute;
+  inset: 0;
+  filter: saturate(1.04) contrast(1.08);
+}
+
+.scene-card::after {
+  background: linear-gradient(90deg, rgba(16, 19, 18, 0.92), rgba(16, 19, 18, 0.32));
+}
+
+.scene-card div {
+  position: relative;
+  z-index: 1;
+  min-height: 104px;
+  display: grid;
+  align-content: end;
+  gap: 6px;
+  padding: 14px;
+}
+
+.scene-card span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.scene-card strong,
+.scene-card small {
+  display: block;
+}
+
+.scene-card small {
+  color: var(--muted);
 }
 
 .commercial-grid {
@@ -442,8 +584,18 @@ h2 {
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
     linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(rgba(16, 19, 18, 0.42), rgba(16, 19, 18, 0.42)),
+    url("https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1400&q=80"),
     #17201e;
   background-size: 36px 36px;
+}
+
+.city-map::before {
+  background:
+    linear-gradient(90deg, rgba(54, 215, 239, 0.18) 1px, transparent 1px),
+    linear-gradient(rgba(54, 215, 239, 0.12) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mix-blend-mode: screen;
 }
 
 .road,
@@ -795,6 +947,7 @@ h2 {
 }
 
 @media (max-width: 1120px) {
+  .visual-command,
   .commercial-grid,
   .sales-grid {
     grid-template-columns: 1fr;
@@ -867,8 +1020,14 @@ h2 {
   .kpi-grid,
   .lower-grid,
   .executive-metrics,
-  .flow-steps {
+  .flow-steps,
+  .hero-signal-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-visual,
+  .hero-visual-overlay {
+    min-height: 420px;
   }
 
   .city-map {
