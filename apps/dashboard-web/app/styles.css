@@ -28,6 +28,21 @@ button {
   font: inherit;
 }
 
+button,
+a,
+select,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
 input,
 select {
   font: inherit;
@@ -36,6 +51,76 @@ select {
 img {
   display: block;
   max-width: 100%;
+}
+
+.nav-item,
+.icon-button,
+.primary-action,
+.module-switcher button,
+.module-actions button,
+.action-row button,
+.function-list button,
+.layer-list button,
+.scene-action-grid button,
+.primary-link,
+.secondary-link,
+.login-form button,
+.public-nav nav a,
+.camera-pin,
+.event-pin,
+.patrol-unit {
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 180ms ease,
+    box-shadow 220ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    transform 220ms ease;
+}
+
+.nav-item::before,
+.icon-button::before,
+.primary-action::before,
+.module-switcher button::before,
+.module-actions button::before,
+.action-row button::before,
+.function-list button::before,
+.layer-list button::before,
+.scene-action-grid button::before,
+.primary-link::before,
+.secondary-link::before,
+.login-form button::before,
+.public-nav nav a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.16) 45%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-120%);
+}
+
+.nav-item:hover::before,
+.icon-button:hover::before,
+.primary-action:hover::before,
+.module-switcher button:hover::before,
+.module-actions button:hover::before,
+.action-row button:hover::before,
+.function-list button:hover::before,
+.layer-list button:hover::before,
+.scene-action-grid button:hover::before,
+.primary-link:hover::before,
+.secondary-link:hover::before,
+.login-form button:hover::before,
+.public-nav nav a:hover::before {
+  opacity: 1;
+  animation: buttonSheen 760ms ease;
+}
+
+button svg,
+a svg {
+  transition: transform 220ms ease, filter 220ms ease;
 }
 
 .command-shell {
@@ -98,6 +183,15 @@ img {
 .icon-button:hover {
   border-color: var(--cyan);
   color: var(--cyan);
+  box-shadow: 0 10px 28px rgba(54, 215, 239, 0.12);
+  transform: translateY(-2px);
+}
+
+.nav-item:hover svg,
+.nav-item.active svg,
+.icon-button:hover svg {
+  filter: drop-shadow(0 0 8px rgba(54, 215, 239, 0.45));
+  transform: scale(1.08);
 }
 
 .workspace {
@@ -164,6 +258,16 @@ img {
   color: #04110d;
   font-weight: 900;
   cursor: pointer;
+  box-shadow: 0 0 0 rgba(18, 201, 155, 0);
+}
+
+.primary-action:hover {
+  box-shadow: 0 16px 34px rgba(18, 201, 155, 0.18);
+  transform: translateY(-2px);
+}
+
+.primary-action:hover svg {
+  transform: scale(1.08) rotate(8deg);
 }
 
 .eyebrow {
@@ -245,6 +349,19 @@ h2 {
 .layer-list button.active {
   border-color: rgba(54, 215, 239, 0.7);
   color: var(--cyan);
+  box-shadow: 0 12px 30px rgba(54, 215, 239, 0.1);
+  transform: translateY(-2px);
+}
+
+.module-switcher button.active svg,
+.module-switcher button:hover svg,
+.module-actions button:hover svg,
+.action-row button:hover svg,
+.function-list button:hover svg,
+.layer-list button:hover svg,
+.layer-list button.active svg {
+  filter: drop-shadow(0 0 8px rgba(54, 215, 239, 0.42));
+  transform: translateY(-1px) scale(1.08);
 }
 
 .active-module-panel {
@@ -290,6 +407,7 @@ h2 {
   border-radius: 50%;
   background: var(--green);
   box-shadow: 0 0 0 6px rgba(18, 201, 155, 0.15);
+  animation: livePulse 1.8s ease-in-out infinite;
 }
 
 .kpi-grid {
@@ -616,10 +734,17 @@ h2 {
 .scene-action-grid button:hover {
   border-color: color-mix(in srgb, var(--module-accent) 72%, transparent);
   color: var(--module-accent);
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--module-accent) 14%, transparent);
+  transform: translateY(-2px);
 }
 
 .scene-action-grid svg {
   flex: 0 0 auto;
+}
+
+.scene-action-grid button:hover svg {
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--module-accent) 48%, transparent));
+  transform: scale(1.1) rotate(-4deg);
 }
 
 .scene-action-grid span,
@@ -652,6 +777,52 @@ h2 {
 
   50% {
     margin-top: -12px;
+  }
+}
+
+@keyframes buttonSheen {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes livePulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 6px rgba(18, 201, 155, 0.15);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(18, 201, 155, 0.04);
+  }
+}
+
+@keyframes mapPing {
+  0% {
+    box-shadow: 0 0 0 0 var(--pin-glow, rgba(54, 215, 239, 0.28));
+  }
+
+  70% {
+    box-shadow: 0 0 0 13px rgba(255, 255, 255, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes unitFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
   }
 }
 
@@ -982,9 +1153,11 @@ h2 {
 }
 
 .camera-pin {
+  --pin-glow: rgba(18, 201, 155, 0.28);
   background: #22312d;
   border: 1px solid var(--green);
   color: var(--green);
+  animation: mapPing 2.4s ease-out infinite;
 }
 
 .pin-1 {
@@ -1002,18 +1175,22 @@ h2 {
 }
 
 .event-pin.critical {
+  --pin-glow: rgba(239, 75, 95, 0.28);
   left: 55%;
   top: 43%;
   background: var(--red);
   box-shadow: 0 0 0 12px rgba(239, 75, 95, 0.16);
+  animation: mapPing 1.6s ease-out infinite;
 }
 
 .event-pin.warning {
+  --pin-glow: rgba(255, 182, 39, 0.28);
   left: 18%;
   top: 70%;
   background: var(--amber);
   color: #1b1402;
   box-shadow: 0 0 0 12px rgba(255, 182, 39, 0.14);
+  animation: mapPing 2.1s ease-out infinite;
 }
 
 .patrol-unit {
@@ -1028,6 +1205,20 @@ h2 {
   font-size: 12px;
   font-weight: 900;
   cursor: pointer;
+  animation: unitFloat 3.2s ease-in-out infinite;
+  box-shadow: 0 10px 28px rgba(18, 201, 155, 0.18);
+}
+
+.camera-pin:hover,
+.event-pin:hover,
+.patrol-unit:hover {
+  transform: translateY(-3px) scale(1.06);
+  z-index: 2;
+}
+
+.camera-pin:hover svg,
+.event-pin:hover svg {
+  transform: scale(1.12);
 }
 
 .unit-1 {
@@ -1038,6 +1229,7 @@ h2 {
 .unit-2 {
   left: 75%;
   top: 28%;
+  animation-delay: -1.4s;
 }
 
 .event-list,
@@ -1343,6 +1535,13 @@ h2 {
 .public-nav nav a.nav-login {
   border-color: var(--line);
   color: var(--cyan);
+  background: rgba(54, 215, 239, 0.06);
+  transform: translateY(-1px);
+}
+
+.public-nav nav a:hover svg,
+.public-nav nav a.nav-login svg {
+  transform: scale(1.06);
 }
 
 .public-hero {
@@ -1412,12 +1611,27 @@ h2 {
 .primary-link {
   background: var(--green);
   color: #04110d !important;
+  box-shadow: 0 16px 36px rgba(18, 201, 155, 0.16);
 }
 
 .secondary-link {
   border: 1px solid var(--line);
   background: rgba(16, 19, 18, 0.62);
   color: var(--text) !important;
+}
+
+.primary-link:hover,
+.secondary-link:hover {
+  transform: translateY(-2px);
+}
+
+.primary-link:hover {
+  box-shadow: 0 20px 46px rgba(18, 201, 155, 0.24);
+}
+
+.secondary-link:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 14px 34px rgba(54, 215, 239, 0.1);
 }
 
 .public-band,
@@ -1533,6 +1747,8 @@ h2 {
   padding: 0 12px;
   font-size: 13px;
   font-weight: 900;
+  animation: unitFloat 3.6s ease-in-out infinite;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
 }
 
 .public-pin-event {
@@ -1545,18 +1761,21 @@ h2 {
   left: 18%;
   top: 27%;
   color: var(--green);
+  animation-delay: -0.8s;
 }
 
 .public-pin-unit {
   left: 62%;
   top: 64%;
   color: var(--cyan);
+  animation-delay: -1.6s;
 }
 
 .public-pin-zone {
   left: 24%;
   top: 68%;
   color: var(--amber);
+  animation-delay: -2.4s;
 }
 
 .public-flow {
@@ -1729,9 +1948,19 @@ h2 {
   cursor: pointer;
 }
 
+.login-form button:hover {
+  box-shadow: 0 16px 36px rgba(18, 201, 155, 0.2);
+  transform: translateY(-2px);
+}
+
+.login-form button:hover svg {
+  transform: translateX(2px) scale(1.05);
+}
+
 .login-form button:disabled {
   cursor: wait;
   opacity: 0.72;
+  transform: none;
 }
 
 .login-error {
@@ -1942,12 +2171,39 @@ h2 {
 
 @media (prefers-reduced-motion: reduce) {
   .holo-ring,
-  .holo-node {
+  .holo-node,
+  .live-dot,
+  .camera-pin,
+  .event-pin,
+  .patrol-unit,
+  .public-pin {
     animation: none;
   }
 
   .hero-visual img,
-  .scene-card {
+  .scene-card,
+  button,
+  a,
+  svg {
     transition: none;
+  }
+
+  .nav-item:hover,
+  .icon-button:hover,
+  .primary-action:hover,
+  .module-switcher button:hover,
+  .module-actions button:hover,
+  .action-row button:hover,
+  .function-list button:hover,
+  .layer-list button:hover,
+  .scene-action-grid button:hover,
+  .primary-link:hover,
+  .secondary-link:hover,
+  .login-form button:hover,
+  .public-nav nav a:hover,
+  .camera-pin:hover,
+  .event-pin:hover,
+  .patrol-unit:hover {
+    transform: none;
   }
 }
