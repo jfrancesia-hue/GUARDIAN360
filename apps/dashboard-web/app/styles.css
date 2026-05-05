@@ -1934,6 +1934,44 @@ h2 {
   padding: 0 12px;
 }
 
+.password-field {
+  position: relative;
+  display: block;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 50px;
+}
+
+.password-field button {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  width: 36px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+}
+
+.password-field button:hover {
+  border-color: rgba(54, 215, 239, 0.35);
+  background: rgba(54, 215, 239, 0.08);
+  color: var(--cyan);
+  box-shadow: none;
+  transform: translateY(-50%);
+}
+
+.password-field button,
+.password-field button:disabled {
+  transform: translateY(-50%);
+}
+
 .login-form button {
   min-height: 46px;
   display: inline-flex;

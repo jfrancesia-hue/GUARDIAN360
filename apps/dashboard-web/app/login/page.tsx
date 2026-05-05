@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, LogIn } from "lucide-react";
+import { Eye, EyeOff, Shield, LogIn } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [tenantSlug, setTenantSlug] = useState(DEMO_TENANT);
   const [email, setEmail] = useState(DEMO_EMAIL);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -94,12 +95,22 @@ export default function LoginPage() {
           </label>
           <label>
             Contrasena
-            <input
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              type="password"
-              placeholder="Guardian360!2026"
-            />
+            <span className="password-field">
+              <input
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                type={showPassword ? "text" : "password"}
+                placeholder="Guardian360!2026"
+              />
+              <button
+                aria-label={showPassword ? "Ocultar contrasena" : "Ver contrasena"}
+                aria-pressed={showPassword}
+                type="button"
+                onClick={() => setShowPassword((currentValue) => !currentValue)}
+              >
+                {showPassword ? <EyeOff size={18} aria-hidden /> : <Eye size={18} aria-hidden />}
+              </button>
+            </span>
           </label>
           {error ? <p className="login-error">{error}</p> : null}
           <button disabled={loading} type="submit">
